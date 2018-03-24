@@ -1,0 +1,431 @@
+<?php
+
+/**
+ * Created by PhpStorm.
+ * User: Joy
+ * Date: 2015/12/24
+ * Time: 14:13
+ */
+class AppreciationPlan extends CActiveRecord
+{
+
+    public $modelName = '增值计划';
+    public $customer_name;
+    public $customer_mobile;
+    public $startTime;
+    public $endTime;
+    public $branch_id;
+    public $region;
+    public $communityIds;
+    public $community_id;
+
+    public $province_id;
+    public $city_id;
+    public $district_id;
+    static $fees_status = array(
+        Item::PROFIT_ORDER_INIT => "待付款",//0
+        Item::PROFIT_ORDER_SUCCESS => "交易成功",//99
+        Item::PROFIT_ORDER_AUTHORIZE => '已授权',//1
+        Item::PROFIT_ORDER_CANCEL => "订单已取消",//98
+        Item::PROFIT_ORDER_REFUND => '已退款',//90
+        Item::PROFIT_ORDER_EXTRACT_ING =>'提现中',
+        Item::PROFIT_ORDER_EXTRACT_FAIL => '提现失败',//97
+        Item::PROFIT_ORDER_EXTRACT_SUCCESS =>'提现成功',
+        Item::PROFIT_ORDER_CONTINUOUS =>'已续投',
+        Item::PROFIT_ORDER_REDEEM_ING =>'赎回中',
+        Item::PROFIT_ORDER_REDEEM_SUCCESS =>'赎回成功',
+        Item::PROFIT_ORDER_REDEEM_FAIL =>'赎回失败',
+    );
+
+    public static function model($className = __CLASS__)
+    {
+        return parent::model($className);
+    }
+
+    /**
+     * @return string the associated database table name
+     */
+    public function tableName()
+    {
+        return 'appreciation_plan';
+    }
+
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules()
+    {
+        // NOTE: you should only define rules for those attributes that
+        // will receive user inputs.
+        return array(
+            array('object_id, customer_id, rate_id, begin_time, stop_time, payment_passage, create_time, pay_time, status', 'numerical', 'integerOnly' => true),
+            array('startTime, endTime, id, sn, pay_sn, branch_id, communityIds, region, customer_id, object_id, profit_type, amount, create_time, status, customer_name, customer_mobile, model', 'safe', 'on'=>'search'),
+            //          ICE 搜索数据
+            array('province_id,city_id,district_id, profit', 'safe'),
+        );
+    }
+
+    public function attributeLabels()
+    {
+        return array(
+            'id' => 'ID',
+            'sn' => '订单号SN',
+            'pay_sn' => '支付单号',
+            'customer_id' => '用户ID',
+            'amount' => '投资金额',
+            'profit' => '预期收益',
+            'profit_type' => '收益类型',
+            'profit_status' => '饭票收益发放状态',
+            'begin_time' => '冲抵开始时间',
+            'stop_time' => '冲抵结束时间',
+            'note' => '备注',
+            'create_ip' => '创建IP',
+            'create_time' => '下单时间',
+            'status' => '状态',
+            'pay_time' => '付款时间',
+            'update_time' => '更新时间',
+            'customer_name' => '业主姓名',
+            'customer_mobile' => '业主手机',
+            'startTime' => '开始时间',
+            'endTime' => '结束时间',
+            'room' => '房间号',
+            'build' => '楼栋',
+            'customerName' => '业主姓名',
+            'region' => '地区',
+            'communityIds' => '小区',
+            'branch_id' => '管辖部门',
+            'community_id' => '小区',
+            'rate_id' => '彩富人生ID',
+            'model' => '订单类型',
+            'remark' => '审核备注',
+            'inviter_mobile' => '推荐手机号码',
+            'inviter_amount' => '提成金额',
+            'cash_create_time' => '提现时间',
+            'cash_result_time' => '提现处理时间',
+        );
+    }
+
+    public function behaviors()
+    {
+        return array(
+            'IpBehavior' => array(
+                'class' => 'common.components.behaviors.IpBehavior',
+                'createAttribute' => 'create_ip',
+                'updateAttribute' => null,
+                'setUpdateOnCreate' => true,
+            ),
+        );
+    }
+
+    /**
+     * @return array relational rules.
+     */
+    public function relations()
+    {
+        // NOTE: you may need to adjust the relation name and the related
+        // class name for the relations automatically generated below.
+
+        return array(
+            'AdvanceFees' => array(self::BELONGS_TO, 'AdvanceFee', 'object_id'),
+            'customer' => array(self::BELONGS_TO, 'Customer', 'customer_id'),
+        );
+    }
+
+    public function getAddress()
+    {
+        $regions = "";
+        if (!empty($this->AdvanceFees)) {
+            $model = ICECommunity::model()->enabled()->findByPk($this->AdvanceFees->community_id);
+            if (!empty($model)) {
+                $regions = $model->getCommunityAddress();
+                $regions.= $this->AdvanceFees->build.$this->AdvanceFees->room;
+            }
+        }
+
+        return $regions;
+    }
+
+    public function getStatusName($html = false)
+    {
+        $return = '';
+        $return .= ($html) ? '<span class="label label-success">' : '';
+        $return .= self::$fees_status[$this->status];
+        $return .= ($html) ? '</span>' : '';
+        return $return;
+    }
+
+    public function getFpProfitStatus()
+    {
+        $statusText = '现金';
+
+        if ($this->profit_type) {
+            $statusText = '饭票<br/>';
+            if (0 == $this->profit_status) {
+                $statusText .= '<span style="color: dimgrey;" >未发放</span>';
+            }
+            elseif (1 == $this->profit_status) {
+                $statusText .= '<span style="color: green;" >系统已发放</span>';
+            }
+            elseif (2 == $this->profit_status) {
+                $statusText .= '<span style="color: seagreen;" >人工已发放';
+            }
+            elseif (3 == $this->profit_status) {
+                $statusText .= '<span style="color: red;" >发放失败';
+            }
+        }
+
+        return $statusText;
+    }
+
+    public static function getStatusNames()
+    {
+        return CMap::mergeArray(array('' => '全部'), self::$fees_status);
+    }
+
+    static public function changeOrderStatus($order_id, $user_id, $user_model, $status, $note = '')
+    {
+        if (empty($order_id)) {
+            throw new CHttpException('404', '无效的操作对象');
+        } else {
+            $order = AppreciationPlan::model()->findByPk($order_id);
+            if (empty($order)) {
+                throw new CHttpException('404', '无效的操作对象');
+            } else {
+                $oldStatus = $order->status;
+
+                $order->status = $status;
+
+                $log = new OthersFeesLog();
+                $log->others_fees_id = $order_id;
+                $log->user_model = $user_model;
+                $log->user_id = $user_id;
+                $log->status = $status;
+                $str = "";
+                switch (strtolower($user_model)) {
+                    case "customer":
+                        $str .= "买家";
+                        break;
+                    case "shop":
+                        $str .= "商家";
+                        break;
+                    case "employee":
+                        $str .= "物业平台";
+                        break;
+                }
+                $str .= " 将订单状态从 【待付款】 修改为 【取消订单】" ;
+                $log->note = $str."，备注:".$note;
+                if ($log->save() && $order->save()) {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            }
+        }
+    }
+
+    public function search()
+    {
+        // @todo Please modify the following code to remove attributes that should not be searched.
+
+        $criteria=new CDbCriteria;
+
+        if ($this->sn) {
+            $criteria->compare('`t`.sn',$this->sn,true);
+        }
+        elseif ($this->pay_sn) {
+            $criteria->compare('`t`.pay_sn',$this->pay_sn,true);
+        }
+        elseif ($this->customer_mobile) {
+            $criteria->with[] = 'customer';
+            $criteria->compare('customer.mobile', $this->customer_mobile);
+        }
+        else {
+            if ($this->startTime != '') {
+                $criteria->compare("`t`.create_time", ">= " . strtotime($this->startTime." 00:00:00"));
+            }
+            if ($this->endTime != '') {
+                $criteria->compare("`t`.create_time", "<= " . strtotime($this->endTime." 23:59:59"));
+            }
+
+            $criteria->with[] = 'AdvanceFees';
+
+            //$employee = Employee::model()->findByPk(Yii::app()->user->id);
+            //$branchIds = $employee->mergeBranch;
+            //选择的组织架构ID
+//            if ($this->branch_id != '')
+//                $community_ids = Branch::model()->findByPk($this->branch_id)->getBranchAllIds('Community');
+//            else if (!empty($this->communityIds)) //如果有小区
+//                $community_ids = $this->communityIds;
+//            else if ($this->region != '') //如果有地区
+//                $community_ids = Region::model()->getRegionCommunity($this->region, 'id');
+//            else {
+//                $community_ids = array();
+//                foreach ($branchIds as $branchId) {
+//                    $data = Branch::model()->findByPk($branchId)->getBranchAllIds('Community');
+//                    $community_ids = array_unique(array_merge($community_ids, $data));
+//                }
+//            }
+
+	        if (Yii::app()->user->getId() != 1) {
+		        //选择的组织架构ID
+		        if ($this->branch_id != '') {
+			        $community_ids = ICEBranch::model()->findByPk($this->branch_id)->ICEGetBranchAllCommunity();
+		        } else if (!empty($this->communityIds)) {
+			        $community_ids = $this->communityIds;
+		        } else if ($this->province_id) {
+			        if ($this->district_id) {
+				        $regionId = $this->district_id;
+			        } else if ($this->city_id) {
+				        $regionId = $this->city_id;
+			        } else if ($this->province_id) {
+				        $regionId = $this->province_id;
+			        } else {
+				        $regionId = 0;
+			        }
+			        $community_ids = ICERegion::model()->getRegionCommunity(
+				        $regionId,
+				        'id'
+			        );
+		        } else {
+			        $employee = ICEEmployee::model()->findByPk(Yii::app()->user->id, '', array(), true);
+			        $community_ids = $employee->ICEGetOrgCommunity();
+		        }
+
+		        $criteria->addInCondition('AdvanceFees.community_id', $community_ids);
+	        }
+
+            $criteria->compare('`t`.id',$this->id);
+            $criteria->compare('`t`.model',$this->id);
+            $criteria->compare('`t`.customer_id',$this->customer_id);
+            $criteria->compare('`t`.object_id',$this->object_id);
+            $criteria->compare('`t`.amount',$this->amount,true);
+            $criteria->compare('`t`.profit_type', $this->profit_type, true);
+            $criteria->compare('`t`.begin_time',$this->begin_time);
+            $criteria->compare('`t`.stop_time',$this->stop_time);
+            $criteria->compare('`t`.note',$this->note, true);
+            $criteria->compare('`t`.status',$this->status);
+            $criteria->compare('`t`.pay_time',$this->pay_time);
+            $criteria->compare('`t`.update_time',$this->update_time);
+        }
+
+        return new ActiveDataProvider($this, array('criteria' => $criteria, 'sort' =>
+            array('defaultOrder' => '`t`.create_time desc',)));
+    }
+
+    public function getCommunityTag()
+    {
+//        $community = empty($this->AdvanceFees) ? null : $this->AdvanceFees->community;
+//		ICE bugfix 下面报错
+        $community_id = empty($this->AdvanceFees) ? '' : $this->AdvanceFees->community_id;
+        $community = ICECommunity::model()->findByPk($community_id);
+
+        if (!empty($community)) {
+//            $_barchName = Branch::getMyParentBranchName($community->branch_id, true);
+//            $_regionName = Region::getMyParentRegionNames($community->region_id, true);
+            $_barchName = $community->ICEGetCommunityBranchesNames();
+            $_regionName = $community->ICEGetCommunityRegionsNames();
+        } else {
+            $_barchName = "未知的部门！";
+            $_regionName = "未知的地区！";
+        }
+        return CHtml::tag(
+            'a',
+            array(
+                'rel' => 'tooltip',
+                'href' => 'javascript:void();',
+                'data-original-title' => '所属部门:' . $_barchName . '，所属地区:' . $_regionName
+            ),
+            empty($community) ? "" : $community->name);
+    }
+
+    public function getMobileTag()
+    {
+        $customer = $this->customer;
+        $mobile = $customer?$customer->mobile:"";
+        $username = $customer?$customer->username:"";
+        $customerName = empty($this->AdvanceFees) ? "" : $this->AdvanceFees->customer_name;
+        return CHtml::tag('a', array('rel' => 'tooltip', 'href' => 'javascript:void();',
+            'data-original-title' => '姓名:' . $customerName . '，帐号:' . $username),
+            $mobile);
+    }
+
+    public function getMonth(){
+        if(!empty($this->rate_id)){
+            if($this->rate_id == 1){
+                return 12;
+            }
+            if($this->rate_id == 2){
+                return 6;
+            }
+            if($this->rate_id == 3){
+                return 3;
+            }
+            if($this->rate_id == 4){
+                return 1;
+            }
+        }
+    }
+
+    protected function ICEGetSearchRegionData($search = array())
+    {
+        return array(
+            'province_id' => isset($search['province_id']) && $search['province_id']
+                ? $search['province_id'] : '',
+            'city_id' => isset($search['city_id']) && $search['city_id']
+                ? $search['city_id'] : '',
+            'district_id' => isset($search['district_id']) && $search['district_id']
+                ? $search['district_id'] : '',
+        );
+    }
+
+    protected function ICEGetLinkageRegionDefaultValueForUpdate()
+    {
+        return array();
+    }
+
+    public function ICEGetLinkageRegionDefaultValueForSearch()
+    {
+        $searchRegion = $this->ICEGetSearchRegionData(isset($_GET[__CLASS__])
+            ? $_GET[__CLASS__] : array());
+
+        $defaultValue = array();
+
+        if ($searchRegion['province_id']) {
+            $defaultValue[] = $searchRegion['province_id'];
+        } else {
+            return $defaultValue;
+        }
+
+        if ($searchRegion['city_id']) {
+            $defaultValue[] = $searchRegion['city_id'];
+        } else {
+            return $defaultValue;
+        }
+
+        if ($searchRegion['district_id']) {
+            $defaultValue[] = $searchRegion['district_id'];
+        } else {
+            return $defaultValue;
+        }
+
+        return $defaultValue;
+    }
+
+    public function ICEGetLinkageRegionDefaultValue()
+    {
+        $updateDefaults = $this->ICEGetLinkageRegionDefaultValueForUpdate();
+        return $updateDefaults
+            ? $updateDefaults
+            : $this->ICEGetLinkageRegionDefaultValueForSearch();
+    }
+
+    //修改订单状态只能由指定的人操作
+    public function getRole(){
+        $username = Yii::app()->user->name;
+        if(!empty($username)){
+            return $username;
+        }
+
+    }
+}

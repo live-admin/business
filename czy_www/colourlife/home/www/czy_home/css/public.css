@@ -1,0 +1,506 @@
+*{
+	padding:0;
+	margin:0;
+}
+html,body{
+    min-width: 1100px;
+	height:100%;
+}
+html{
+	font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+button,input{
+    font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+img{
+	vertical-align: middle; 
+}
+a{
+	text-decoration:none;
+}
+ul,li{
+    list-style: none;
+}
+.hide{
+    display: none;
+}
+.full-bg{
+    width:100%;
+    height:100%;  
+    position: relative;
+}
+.content-wrap{
+    /*width:1100px;*/
+    margin:0 auto;
+}
+.about-info{
+    width:100%;
+    overflow: hidden;
+}
+.about-info ul{
+    color:#fff;
+    font-size:16px;
+    float:right;
+    margin-top:24px;
+    margin-right: 20px;
+}
+.about-info ul li{
+    float:left;
+    margin-right:20px;
+    border-right:1px solid #fff;
+}
+.about-info ul li:last-child{
+    border:none;
+}
+.about-info ul li a{
+    color:#fff;
+    margin-right:20px;
+} 
+.sign_out{
+    margin-right:20px;
+}
+.header{
+    width: 81%;
+    overflow: hidden;
+    margin: 0 auto;
+}
+.header .logo{
+    width:158px;
+    height:55px;
+    margin-left:40px;
+    background:url(../img/colourlife_icon.png) no-repeat;
+    float:left;
+}
+.nav{
+    /*margin-right:200px;*/
+    /*float:right;*/
+    /*float:left;*/
+    /*margin-left:170px;*/
+    width: 60%;
+    height: 130px;
+    z-index: 990;
+    margin: 0 auto;
+}
+.nav ul{
+    overflow: hidden;
+
+}
+.Customers{
+  float: right;
+}
+.nav .Customers li{
+    padding: 0 20px;
+    float: left;
+    height: 49%;
+    margin-top: 20px;
+    line-height: 20px;
+    font-size:0.9rem;
+    color: #fff;
+    text-align: center;
+    border-right: 1px solid #fff;
+    display: none;
+}
+.nav .Customers li a{
+    color:#fff;
+}
+.nav .Customers li:last-child{
+    border-right: none;
+    display: block;
+    /*width:24px;*/
+    /*height:24px;*/
+    /*display: inline-block;*/
+    /*background:url(../img/search.png) no-repeat;*/
+    /*margin-top:23px;*/
+}
+
+.nav ul li a:hover{
+    color:#27a2f0;
+}
+.nav ul li.active a{
+    color:#27a2f0 !important;
+}
+.headers{
+    height: 60px;
+    width: 100%;
+    text-align: justify;
+}
+.headers>li{
+    float: left;
+}
+.headers>li:nth-child(1) {
+    width:16%;
+    height:60px;
+    position: relative;
+    /*margin-left: 40px;*/
+}
+.headers>li:nth-child(1)>img {
+    /* margin-top: 44px; */
+    width:100%;
+    height: auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+}
+.headers>li:nth-child(2) {
+    width:84%;
+    height:60px;
+}
+.navigation {
+    width: 100%;
+    height:60px;
+    /*padding-left: 170px;*/
+    line-height: 60px;
+    text-align: center;
+    min-width: 444px;
+}
+.navigation>li {
+    float: right;
+    /* width: 14.2%; */
+    /*padding: 0 45px;*/
+    margin:0 3.5%;
+    height: 100%;
+    line-height: 60px;
+    font-size:1rem;
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+}
+#selected>a {
+    color: #318dc7;
+}
+.navigation>li>a {
+    color: #fff;
+}
+.headers>li:nth-child(3) {
+    width: 160px;
+    height: 66px;
+    position: relative;
+}
+.sou_banner {
+    display: none;
+    height: 24px;
+    width:100%;
+    text-align: center;
+    min-width: 444px;
+    padding: 21px 0;
+    /*margin-left: 170px;*/
+}
+.sou_banner li:nth-child(3) {
+    width: 20%;
+    background: url(../img/sous.png)no-repeat 90%;
+}
+.sou_banner li:nth-child(2) {
+    width: 75%;
+    border-left: 1px solid #fff;
+}
+.sou_banner li:nth-child(2) input {
+    width: 98%;
+    height: 100%;
+    background-color: rgba(0,0,0,0);
+    border: 0;
+    color: #ebe9e9;
+    font-size: 1rem;
+    padding-left: 2%;
+    outline: none;
+}
+.sou_banner li:nth-child(1) {
+    width: 3%;
+    cursor: pointer;
+    background: url(../img/sou_close.png)no-repeat 10%;
+}
+.sou_banner li {
+    height: 24px;
+    float: right;
+}
+.Sign_out {
+    cursor: pointer;
+}
+.line{
+    width:50px;
+    border:1px solid #27a2f0;
+    margin:0 auto;
+}
+.btn a,.detail-btn a{
+    width:220px;
+    height:60px;
+    line-height:60px;
+    text-align: center;
+    color:#fff;
+    display:block;
+    background-color: #19a0f3;
+    font-size: 20px;
+    border-radius: 5px;
+    margin:0 auto;
+     margin-top:80px;
+}
+.footer{
+    width:100%;
+    height:110px;
+    line-height: 110px;
+    font-size: 12px;
+    color:#fff;
+    background-color: #35444d;
+    text-align: center;
+}
+/*首页搜索*/
+#sou_banner{
+    display:none;
+    height:24px;
+    width:680px;
+    text-align: center;
+    min-width: 444px;
+    padding:21px 0;
+}
+#sou_banner>li{
+    height:24px;
+    float:left;
+    line-height:0;
+    padding:0;
+}
+#sou_banner li:nth-child(1){
+    width:5%;
+    background:url(../img/sous.png)no-repeat;
+}
+#sou_banner li:nth-child(2){
+    width:87%;
+    border-left:1px solid #fff;
+}
+#sou_banner li:nth-child(2) input{
+    width:98%;
+    height:100%;
+    background-color:rgba(0,0,0,0);
+    border:0;
+    color: #ebe9e9;
+    font-size:1rem;
+    padding-left:2%;
+    outline:none;
+}
+#sou_banner li:nth-child(3){
+    width:5%;
+    cursor:pointer;
+    background:url(../img/sou_close.png)no-repeat 10%;
+}
+/*下载彩之云app*/
+.czy_app{
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    position: fixed;
+    z-index: 991;
+    top: 0;
+    left: 0;
+}
+.czy_app>ul{
+    width:800px;
+    height:auto;
+    padding-bottom:2.7%;
+    background-color:rgba(0,0,0,0.8);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    -o-transform: translate(-50%,-50%);
+    -moz-transform: translate(-50%,-50%);
+    -webkit-transform: translate(-50%,-50%);
+    -khtml-transform: translate(-50%,-50%);
+}
+.czy_app>ul>li:nth-child(1){
+    width:100%;
+    height:42px;
+}
+.czy_app>ul>li:nth-child(1)>span{
+    height:14px;
+    width:14px;
+    background:url(../img/close.png) no-repeat;
+    background-size:100%;
+    display: block;
+    float: right;
+    margin:14px 14px 0 0;
+    cursor:pointer;
+}
+.czy_app>ul>li:nth-child(2){
+    width:100%;
+    height:auto;
+}
+.czy_app>ul>li:nth-child(2)>div:nth-child(1){
+    width:23.333%;
+    height:74px;
+    background:url(../img/czy_logos.png) no-repeat;
+    background-size:100%;
+    margin:0 auto;
+}
+.czy_app>ul>li:nth-child(2)>div:nth-child(2){
+    width:25.22222%;
+    height:222px;
+    background:url(../img/erweim.png) no-repeat;
+    background-size:100%;
+    margin:0 auto;
+    margin-top:5.5%;
+}
+.czy_app>ul>li:nth-child(2)>p{
+    text-align: center;
+    width:100%;
+    color:#f2f3f4;
+    font-size: 24px;
+    margin:2.5% 0 5.2% 0;
+}
+.czy_app>ul>li:nth-child(2)>div:nth-child(4){
+    width:300px;
+    height:auto;
+    margin:0 auto;
+    margin-top:4.6%;
+}
+.czy_app>ul>li:nth-child(2)>div:nth-child(4)>button{
+    width:300px;
+    height:50px;
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius:8px;
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #27a2f0;
+    letter-spacing:1px;
+    margin:0 auto;
+}
+/*彩之云客服*/
+.czy_Customerservice{
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    position: fixed;
+    z-index: 991;
+    top: 0;
+    left: 0;
+}
+.czy_Customerservice>ul{
+    width:800px;
+    height:auto;
+    padding-bottom:2.7%;
+    background-color:rgba(0,0,0,0.8);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    -o-transform: translate(-50%,-50%);
+    -moz-transform: translate(-50%,-50%);
+    -webkit-transform: translate(-50%,-50%);
+    -khtml-transform: translate(-50%,-50%);
+}
+.czy_Customerservice>ul>li:nth-child(1){
+    width:100%;
+    height:42px;
+}
+.czy_Customerservice>ul>li:nth-child(1)>span{
+    height:14px;
+    width:14px;
+    background:url(../img/close.png) no-repeat;
+    background-size:100%;
+    display: block;
+    float: right;
+    margin:14px 14px 0 0;
+    cursor:pointer;
+}
+.czy_Customerservice>ul>li:nth-child(2){
+    width:100%;
+    height:auto;
+}
+.czy_Customerservice>ul>li:nth-child(2)>div:nth-child(1){
+    width:23.333%;
+    height:74px;
+    background:url(../img/czy_logos.png) no-repeat;
+    background-size:100%;
+    margin:0 auto;
+}
+.czy_Customerservice>ul>li:nth-child(2)>div:nth-child(2){
+    width:25.22222%;
+    height:224px;
+    background:url(../img/erweim.png) no-repeat;
+    background-size:100%;
+    margin:0 auto;
+    margin-top:5.5%;
+}
+.czy_Customerservice>ul>li:nth-child(2)>p{
+    text-align: center;
+    width:100%;
+    color:#f2f3f4;
+    font-size:24px;
+    margin-top:2.2%;
+}
+/*登录*/
+.about-info>ul>li:nth-child(1){
+display: none;
+}
+.about-info>ul>li:nth-child(2){
+    display: none;
+}
+.twoczy_username{
+color:#fff;
+}
+button{
+    outline: none;
+}
+.left_arrow,.sign_out,.right_arrow{
+    cursor:pointer;
+}
+/*新增备案号*/
+.new_footer{
+    width:100%;
+    height:100px;
+    background-color:rgba(0,0,0,.7);
+    text-align:center;
+    color:#fff;
+}
+.new_footer ul{
+    color:#fff;
+}
+.new_footer ul li:nth-child(1){
+   padding-top:30px;
+}
+.new_footer ul li a{
+   color:#fff;
+} 
+.order-wrap{
+    background-color:#373d41;
+}
+/*彩.社区*/
+.header_list{
+    height:60px;
+    width:100%;
+}
+.header_list>li{
+    float:right;
+    color:#fff;
+    height:60px;
+    line-height:60px;
+    margin:0 3%;
+}
+.header_list a{
+    color:#fff;
+    font-size:1rem;
+}
+.header_list a:hover{
+    color:#27a2f0;
+}

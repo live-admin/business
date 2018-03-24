@@ -1,0 +1,89 @@
+.colourlife-bg{
+    height:1080px;
+    background:url(../img/colourlife_bg.jpg) no-repeat center top;
+}
+
+.introduce{
+	width:1280px;
+	margin:100px auto 65px;
+	color:#fff;
+}
+.descript{
+	margin-bottom: 60px;
+}
+.descript p{
+	text-align: center;
+	font-size:22px;
+	margin-top:10px;
+}
+.descript p:nth-child(1){
+	font-size: 30px;
+}
+.descript p:nth-child(3){
+	font-size: 16px;
+}
+.introduce-info{
+	width:100%;
+	background-color: rgba(0,0,0,0.4);
+}
+.introduce-info ul{
+	overflow: hidden;
+}
+.introduce-info ul li{
+	float:left;
+	padding:0 70px;
+	margin-top:130px;
+	margin-bottom: 150px;
+}
+.introduce-info ul li em{
+	display: block;
+	margin:0 auto;
+}
+.introduce-info ul li:nth-child(1) em{
+	width:38px;
+	height:38px;
+	background:url(../img/colourlife_icon01.png) no-repeat;
+}
+.introduce-info ul li:nth-child(2) em{
+	width:37px;
+	height:37px;
+	background:url(../img/colourlife_icon02.png) no-repeat;
+}
+.introduce-info ul li:nth-child(3) em{
+	width:47px;
+	height:32px;
+	background:url(../img/colourlife_icon03.png) no-repeat;
+}
+.introduce-info ul li:nth-child(4) em{
+	width:35px;
+	height:41px;
+	background:url(../img/colourlife_icon04.png) no-repeat;
+}
+.introduce-info ul li:nth-child(5) em{
+	width:44px;
+	height:44px;
+	background:url(../img/colourlife_icon05.png) no-repeat;
+}
+.introduce-info ul li p{
+	font-size: 14px;
+	text-align: center;
+	margin-top:20px;
+}
+.introduce-info ul li p:nth-child(2){
+	font-size: 18px;
+}
+.self-btn a{
+	margin-top: 60px;
+}
+.detail-introduce{
+	width:900px;
+	margin:0 auto;
+}
+.detail-bg{
+	width:901px;
+	height:588px;
+	background:url(../img/colourlife_bottom_bg.png) no-repeat;
+}
+.detail-btn{
+	margin-bottom: 120px;
+}

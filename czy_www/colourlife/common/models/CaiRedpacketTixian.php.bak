@@ -1,0 +1,484 @@
+<?php
+
+/**
+ * This is the model class for table "cai_redpacket_tixian".
+ *
+ * The followings are the available columns in table 'cai_redpacket_tixian':
+ * @property integer $id
+ * @property string $sn
+ * @property integer $employee_id
+ * @property integer $bank_id
+ * @property string $card_num
+ * @property string $red_packet
+ * @property integer $create_time
+ * @property integer $status
+ * @property string $update_username
+ * @property integer $update_userid
+ * @property integer $update_time
+ */
+class CaiRedpacketTixian extends CActiveRecord
+{	
+	public $modelName = '彩管家红包提现';
+	public $startTime;
+    public $endTime;
+    public $bankName;
+    public $employeeName;
+    public $OAName;
+    public $employeeMobile;
+
+	static $fees_status = array(//待审核0 //提现成功99 //提现失败98
+        Item::FEES_AWAITING_PAYMENT => "待审核",
+        Item::FEES_TRANSACTION_SUCCESS => "提现成功",
+        Item::FEES_CANCEL => "提现失败",
+    );
+
+    static $next_status = array(//提现成功99 //提现失败98
+        Item::FEES_TRANSACTION_SUCCESS => "提现成功",
+        Item::FEES_CANCEL => "提现失败",
+    );
+
+    static $next_status2 = array(//提现成功99 //提现失败98
+        Item::FEES_TRANSACTION_SUCCESS => "提现成功",
+    );
+
+    static public function getNextAction($status)
+    {
+        return $status==Item::FEES_AWAITING_PAYMENT?self::$next_status:self::$next_status2;
+    }
+
+    public function tableName()
+    {
+        return 'cai_redpacket_tixian';
+    }
+
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules()
+    {
+        // NOTE: you should only define rules for those attributes that
+        // will receive user inputs.
+        return array(
+            array('employee_id, sn, bind_bank_id, bank_id, card_num, red_packet', 'required'),
+            array('employee_id, bind_bank_id, bank_id, create_time, status, update_userid, update_time', 'numerical', 'integerOnly'=>true),
+            array('sn, card_holder, card_num, update_username', 'length', 'max'=>32),
+            array('red_packet, real_money, rate', 'length', 'max'=>10),
+            array('note, remake', 'safe'),
+            // The following rule is used by search().
+            // @todo Please remove those attributes that should not be searched.
+            array('id, sn, employee_id, bind_bank_id, bank_id, card_holder, card_num, red_packet, real_money, rate, create_time, status, update_username, update_userid, update_time, note, remake, startTime, endTime, bankName, employeeName, OAName, employeeMobile', 'safe', 'on'=>'search'),
+            array('id, sn, employee_id, bind_bank_id, bank_id, card_holder, card_num, red_packet, real_money, rate, create_time, status, update_username, update_userid, update_time, note, remake, startTime, endTime, bankName, employeeName, OAName, employeeMobile', 'safe', 'on'=>'report_search'),
+        );
+    }
+
+    /**
+     * @return array relational rules.
+     */
+    public function relations()
+    {
+        // NOTE: you may need to adjust the relation name and the related
+        // class name for the relations automatically generated below.
+        return array(
+            'employee' => array(self::BELONGS_TO, 'Employee', 'employee_id'),
+            'updater' => array(self::BELONGS_TO, 'Employee', 'update_userid'),
+            'bank' => array(self::BELONGS_TO, 'CaiRedpacketBank', 'bank_id'),
+            'bindbank' => array(self::BELONGS_TO, 'CaiRedpacketBindBank', 'bind_bank_id'),
+        );
+    }
+
+
+
+    /**
+     * @return array customized attribute labels (name=>label)
+     */
+    public function attributeLabels()
+    {
+        return array(
+            'id' => 'ID',
+            'sn' => 'SN号',
+            'employee_id' => '员工ID',
+            'bind_bank_id' => '绑定银行信息ID',
+            'bank_id' => '银行卡ID',
+            'card_num' => '银行卡号',
+            'red_packet' => '红包提现金额',
+            'real_money' => '实际到账金额',
+            'rate' => '税率',
+            'create_time' => '提现时间',
+            'status' => '状态',
+            'update_username' => '处理人',
+            'update_userid' => '处理人ID',
+            'update_time' => '处理时间',
+            'note' => '订单备注',
+            'remake' => '处理备注',
+            'startTime' => '开始时间',
+            'endTime' => '结束时间',
+            'card_holder' => '持卡人',
+            'bankName' => '提现银行',
+            'employeeName' => '员工',
+            'OAName' => 'OA账号',
+            'employeeMobile' => '员工手机',
+        );
+    }
+
+    /**
+     * Retrieves a list of models based on the current search/filter conditions.
+     *
+     * Typical usecase:
+     * - Initialize the model fields with values from filter form.
+     * - Execute this method to get CActiveDataProvider instance which will filter
+     * models according to data in model fields.
+     * - Pass data provider to CGridView, CListView or any similar widget.
+     *
+     * @return CActiveDataProvider the data provider that can return the models
+     * based on the search/filter conditions.
+     */
+    public function search()
+    {
+        // @todo Please modify the following code to remove attributes that should not be searched.
+        $criteria=new CDbCriteria;
+        $criteria->compare('id',$this->id);
+        $criteria->compare('sn',$this->sn,true);
+        $criteria->compare('employee_id',$this->employee_id);
+        $criteria->compare('bind_bank_id',$this->bind_bank_id);
+        $criteria->compare('bank_id',$this->bank_id);
+        $criteria->compare('card_holder',$this->card_holder,true);
+        $criteria->compare('card_num',$this->card_num,true);
+        $criteria->compare('red_packet',$this->red_packet,true);
+        $criteria->compare('real_money',$this->real_money,true);
+        $criteria->compare('rate',$this->rate,true);
+        // $criteria->compare('create_time',$this->create_time);
+        $criteria->compare('status',$this->status);
+        $criteria->compare('update_username',$this->update_username,true);
+        $criteria->compare('update_userid',$this->update_userid);
+        $criteria->compare('update_time',$this->update_time);
+        $criteria->compare('note',$this->note,true);
+        $criteria->compare('remake',$this->remake,true);
+
+        if ($this->startTime!= '') {
+            $criteria->compare("create_time", ">= " . strtotime($this->startTime." 00:00:00"));
+        }
+        if ($this->endTime!= '') {
+            $criteria->compare("create_time", "<= " . strtotime($this->endTime." 23:59:59"));
+        }
+
+        if ($this->bankName!= '') {
+            $criteria->with[] = 'bank';
+            $criteria->compare("bank.name", $this->bankName);
+        }
+
+
+//        if ($this->employeeName!= '') {
+//            $criteria->with[] = 'employee';
+//            $criteria->compare("employee.name", $this->employeeName);
+//        }
+//
+//        if ($this->employeeMobile!= '') {
+//            $criteria->with[] = 'employee';
+//            $criteria->compare("employee.mobile", $this->employeeMobile);
+//        }
+//
+//        if ($this->OAName!= '') {
+//            $criteria->with[] = 'employee';
+//            $criteria->compare("employee.username", $this->OAName);
+//        }
+
+//      ICE 上面三个搜索就是为了让查询更准确，而不是用表里面的什么，所以按照以下接入ice
+	    $employee_ids = array();
+	    if ($this->employeeName != '') {
+		    $employees = ICEEmployee::model()->ICEGetAccountSearch(array('keyword' => $this->employeeName));
+		    if (!empty($employees)) {
+			    foreach ($employees as $employee) {
+				    $employee_ids[] = $employee['czyId'];
+			    }
+		    }
+	    }
+	    if ($this->employeeMobile != '') {
+		    $employees = ICEEmployee::model()->ICEGetAccountSearch(array('keyword' => $this->employeeMobile));
+		    if (!empty($employees)) {
+			    foreach ($employees as $employee) {
+				    $employee_ids[] = $employee['czyId'];
+			    }
+		    }
+	    }
+	    if ($this->OAName != '') {
+		    $employees = ICEEmployee::model()->ICEGetAccountSearch(array('keyword' => $this->OAName));
+		    if (!empty($employees)) {
+			    foreach ($employees as $employee) {
+				    $employee_ids[] = $employee['czyId'];
+			    }
+		    }
+	    }
+	    if (!empty($employee_ids)) {
+		    $criteria->addInCondition('t.employee_id', array_unique($employee_ids));
+	    }
+
+	    return new CActiveDataProvider($this, array(
+            'criteria'=>$criteria,
+        ));
+    }
+
+
+
+
+    public function report_search()
+    {
+        // @todo Please modify the following code to remove attributes that should not be searched.
+        $criteria=new CDbCriteria;
+        if (isset($_GET['CaiRedpacketTixian']) && !empty($_GET['CaiRedpacketTixian'])) {
+            $_SESSION['CaiRedpacketTixian'] = array();
+            $_SESSION['CaiRedpacketTixian'] = $_GET['CaiRedpacketTixian'];
+        }
+        if (isset($_GET['exportAction']) && $_GET['exportAction'] == 'exportReport') {
+            if (isset($_SESSION['CaiRedpacketTixian']) && !empty($_SESSION['CaiRedpacketTixian'])) {
+                foreach ($_SESSION['CaiRedpacketTixian'] as $key => $val) {
+                    if ($val != "") {
+                        $this->$key = $val;
+                    }
+                }
+            }
+        }
+
+        $criteria->compare('id',$this->id);
+        $criteria->compare('sn',$this->sn,true);
+        $criteria->compare('employee_id',$this->employee_id);
+        $criteria->compare('bind_bank_id',$this->bind_bank_id);
+        $criteria->compare('bank_id',$this->bank_id);
+        $criteria->compare('card_holder',$this->card_holder,true);
+        $criteria->compare('card_num',$this->card_num,true);
+        $criteria->compare('red_packet',$this->red_packet,true);
+        $criteria->compare('real_money',$this->real_money,true);
+        $criteria->compare('rate',$this->rate,true);
+        // $criteria->compare('create_time',$this->create_time);
+        $criteria->compare('status',$this->status);
+        $criteria->compare('update_username',$this->update_username,true);
+        $criteria->compare('update_userid',$this->update_userid);
+        $criteria->compare('update_time',$this->update_time);
+        $criteria->compare('note',$this->note,true);
+        $criteria->compare('remake',$this->remake,true);
+
+        if ($this->startTime!= '') {
+            $criteria->compare("create_time", ">= " . strtotime($this->startTime." 00:00:00"));
+        }
+        if ($this->endTime!= '') {
+            $criteria->compare("create_time", "<= " . strtotime($this->endTime." 23:59:59"));
+        }
+
+        if ($this->bankName!= '') {
+            $criteria->with[] = 'bank';
+            $criteria->compare("bank.name", $this->bankName);
+        }
+
+        $criteria->with[] = 'employee';
+        if ($this->employeeName!= '') {            
+            $criteria->compare("employee.name", $this->employeeName);
+        }
+
+        if ($this->employeeMobile!= '') {
+            $criteria->compare("employee.mobile", $this->employeeMobile);
+        }
+        
+        if ($this->OAName!= '') {
+            $criteria->compare("employee.username", $this->OAName);
+        }
+        return new CActiveDataProvider($this, array(
+            'criteria'=>$criteria,
+        ));
+    }
+
+
+
+
+    public function behaviors()
+    {
+        return array(
+            'CTimestampBehavior' => array('class' => 'zii.behaviors.CTimestampBehavior',
+                'createAttribute' => 'create_time',
+                'updateAttribute' => 'update_time',
+                'setUpdateOnCreate' => false,
+            ),
+        );
+    }
+
+
+    public function getBankName()
+    {
+        return empty($this->bank)?'':$this->bank->name;
+    }
+
+
+
+    public function getEmployeeName()
+    {
+        // return empty($this->employee)?'':$this->employee->name;
+
+        if(!empty($this->employee_id)){
+            $employee = ICEEmployee::model()->findbypk($this->employee_id);
+            if(!empty($employee['name'])){
+                return $employee['name'];
+            }
+
+        }
+
+        return '';
+    }
+
+
+
+    public function getOAUserName()
+    {
+        // return empty($this->employee)?'':$this->employee->username;       
+
+        if(!empty($this->employee_id)){
+            $employee = ICEEmployee::model()->findbypk($this->employee_id);
+            if(!empty($employee['username'])){
+                return $employee['username'];
+            }
+
+        }
+
+        return '';
+    }
+
+
+    public function getEmployeeMobile()
+    {
+        // return empty($this->employee)?'':$this->employee->mobile;
+  
+//      ICE接入
+        if(!empty($this->employee_id)){
+            $employee = ICEEmployee::model()->findbypk($this->employee_id);
+            if(!empty($employee->mobile)){
+                return $employee->mobile;
+            }
+
+        }
+
+        return '';
+    }
+
+
+
+    public function getUpdaterName()
+    {
+        return empty($this->updater)?'':$this->updater->name;
+    }
+
+
+    public function getUpdaterMobile()
+    {
+        return empty($this->updater)?'':$this->updater->mobile;
+    }
+
+    public function getEmployeeBranch()
+    {
+        return empty($this->employee)?'':$this->employee->BranchBYONE;
+    }
+
+    public function getCreateTime()
+    {
+        return date("Y-m-d H:i:s", $this->create_time);
+    }
+    
+
+    public function getUpdateTime()
+    {
+        return date("Y-m-d H:i:s", $this->update_time);
+    }
+
+    public function getSimpleRealMoney()
+    {
+        return empty($this->real_money)?"0.00":F::price_formatNew($this->real_money);
+    }
+
+    
+
+    public function getBankList($flag=false,$extra=false){
+        $list = array();
+        $criteria = new CDbCriteria;  
+        $criteria->condition = 'state=:state and is_deleted=:is_deleted';  
+        $criteria->params = array(':state'=>0, ':is_deleted'=>0);   
+        $model = CaiRedpacketBank::model()->findAll($criteria);
+        foreach($model as $_v){
+            if($flag){
+                $list[$_v->name] = $_v->name;
+            }else{
+                $list[$_v->id] = $_v->name;
+            }  
+        }
+        if(!$extra){
+            return $list;
+        }else{
+            return array_merge(array(''=>'全部'), $list);
+        }
+        
+    }
+
+
+
+
+    public static function createRedPacketOrder($feeAttr)
+    {
+        //判断参数
+        if (empty($feeAttr)) {
+            CaiRedpacketTixian::model()->addError('id', "红包提现失败！");
+            return false;
+        }
+
+        //创建我们的订单记录及记录
+        $other = new CaiRedpacketTixian();
+        $other->attributes = $feeAttr;
+
+        if (!$other->save()) {
+            CaiRedpacketTixian::model()->addError('id', "红包提现失败！");
+            return false;
+        } else {
+            //写订单成功日志
+            $items = array(
+                'employee_id' => $other->employee_id,//业主的ID
+                'sum' => $other->red_packet,//红包金额,
+                'sn' => $other->sn,//订单号(from_type=1or2or3的情况下)
+                'from_type' => Item::CAI_RED_PACKET_FROM_TYPE_TIXIAN_FAIL_REFUND,
+                'to_type' => Item::CAI_RED_PACKET_TO_TYPE_TIXIAN,
+            );
+            $redPacked = new CaiRedPacket();
+            if(!$redPacked->consumeRedPacker($items)){
+                @$other->delete();
+                return false;
+            }
+        	Yii::log("彩管家红包提现订单保存成功：订单:{$other->sn},提现金额:{$other->red_packet},用户：{$other->employee->name}({$other->employee_id})", CLogger::LEVEL_INFO, 'colourlife.core.caiRedpacketTixian.createRedPacketOrder');
+        }
+        return true;
+
+     }
+
+
+    public function getStatusName($html = false)
+    {
+        $return = '';
+        $return .= ($html) ? '<span class="label label-success">' : '';
+        $return .= self::$fees_status[$this->status];
+        $return .= ($html) ? '</span>' : '';
+        return $return;
+    }
+
+    
+
+    public static function getStatusNames()
+    {
+        return CMap::mergeArray(array('' => '全部'), self::$fees_status);
+    }
+
+
+
+
+    /**
+     * Returns the static model of the specified AR class.
+     * Please note that you should have this exact method in all your CActiveRecord descendants!
+     * @param string $className active record class name.
+     * @return CaiRedpacketTixian the static model class
+     */
+    public static function model($className=__CLASS__)
+    {
+        return parent::model($className);
+    }
+}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试弹窗dome</title>
+    <script src="../js/jquery-1.10.1.min.js"></script>
+</head>
+<body>
+<button type="button" class="btn">Click Me!</button>
+</body>
+<script>
+    $(function(){
+        $(".btn").click(function(){
+            var array=[
+                  {"name":"取消","url":""},
+                  {"name":"确定","url":"www.baidu.com"}];
+            var param={
+                "title":"标题",
+                "content":"这是一个弹窗",
+                "buttons":array};
+            position(param);
+        });
+        var u = navigator.userAgent, app = navigator.appVersion;
+        var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+        var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+        function position(param){
+            if(isAndroid){
+                try{
+                    jsObject.alertActivity(JSON.stringify(param));
+//                    var response = $.parseJSON(jsObject.alertActivity(param));
+//                    var last=response.toJSONString(); //将JSON对象转化为JSON字符
+//                    var last=JSON.stringify(obj); //将JSON对象转化为JSON字符
+                }catch(error){
+                    console.log(error.message);
+                    console.log("Android请升级到最新版本");
+                }
+            }else if(isiOS){
+                try{
+                    setupWebViewJavascriptBridge(function(bridge){
+                        //bridge.callHandler('getLocationActivity','', function callback(response) {
+                        //    alert(response);
+                        //});
+                        bridge.callHandler('alertActivity',param,function callback(response) {
+//                            var last=response.toJSONString(); //将JSON对象转化为JSON字符
+                        });
+                        bridge.registerHandler('colourlifeAlertHandler', function(data, responseCallback) {
+                            colourlifeAlertHandler(data);
+                        })
+                    });
+                }catch(e){
+                    console.log(e);
+                    console.log("请升级到最新版本");
+                }
+            }
+        };
+    });
+    function setupWebViewJavascriptBridge(callback) {
+        if (window.WebViewJavascriptBridge) { return callback(WebViewJavascriptBridge); }
+        if (window.WVJBCallbacks) { return window.WVJBCallbacks.push(callback); }
+        window.WVJBCallbacks = [callback];
+        var WVJBIframe = document.createElement('iframe');
+        WVJBIframe.style.display = 'none';
+        WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';
+        document.documentElement.appendChild(WVJBIframe);
+        setTimeout(function() { document.documentElement.removeChild(WVJBIframe) }, 0)
+    }
+    //回调函数
+    function colourlifeAlertHandler(data){
+        alert(data);
+//            var last=JSON.stringify(data); //将JSON对象转化为JSON字符
+            alert('回调');
+    }
+
+</script>
+</html>

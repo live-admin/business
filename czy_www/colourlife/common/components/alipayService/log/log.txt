@@ -1,0 +1,141 @@
+2016-02-26 07:26:08  POST: array (
+)
+2016-02-26 07:26:08  GET: array (
+  'param' => 'qr',
+)
+2016-02-26 07:26:08  response: stdClass::__set_state(array(
+   'error_response' => 
+  stdClass::__set_state(array(
+     'code' => '40002',
+     'msg' => 'Invalid Arguments',
+     'sub_code' => 'isv.invalid-app-id',
+     'sub_msg' => '无效的AppID参数',
+  )),
+))
+2016-03-31 11:28:55  POST: array (
+)
+2016-03-31 11:28:55  GET: array (
+)
+2016-03-31 11:29:08  POST: array (
+)
+2016-03-31 11:29:08  GET: array (
+  'param' => 'qr',
+)
+2016-03-31 11:29:09  response: stdClass::__set_state(array(
+   'error_response' => 
+  stdClass::__set_state(array(
+     'code' => '40002',
+     'msg' => 'Invalid Arguments',
+     'sub_code' => 'isv.invalid-app-id',
+     'sub_msg' => '无效的AppID参数',
+  )),
+))
+2016-04-01 04:05:26  POST: array (
+)
+2016-04-01 04:05:26  GET: array (
+)
+2016-04-01 04:05:29  POST: array (
+)
+2016-04-01 04:05:29  GET: array (
+)
+2016-04-01 04:05:31  POST: array (
+)
+2016-04-01 04:05:31  GET: array (
+  'param' => 'qr',
+)
+2016-04-01 04:05:32  response: stdClass::__set_state(array(
+   'error_response' => 
+  stdClass::__set_state(array(
+     'code' => '40002',
+     'msg' => 'Invalid Arguments',
+     'sub_code' => 'isv.invalid-app-id',
+     'sub_msg' => '无效的AppID参数',
+  )),
+))
+2016-04-01 04:05:54  POST: array (
+)
+2016-04-01 04:05:54  GET: array (
+  'param' => 'follow',
+)
+2016-04-01 04:05:54  response: stdClass::__set_state(array(
+   'error_response' => 
+  stdClass::__set_state(array(
+     'code' => '40002',
+     'msg' => 'Invalid Arguments',
+     'sub_code' => 'isv.invalid-app-id',
+     'sub_msg' => '无效的AppID参数',
+  )),
+))
+2016-04-01 04:05:57  POST: array (
+)
+2016-04-01 04:05:57  GET: array (
+  'param' => 'gis',
+)
+2016-04-01 04:05:57  response: stdClass::__set_state(array(
+   'error_response' => 
+  stdClass::__set_state(array(
+     'code' => '40002',
+     'msg' => 'Invalid Arguments',
+     'sub_code' => 'isv.invalid-app-id',
+     'sub_msg' => '无效的AppID参数',
+  )),
+))
+2016-04-01 04:08:17  POST: array (
+)
+2016-04-01 04:08:17  GET: array (
+)
+2016-04-01 08:34:14  POST: array (
+)
+2016-04-01 08:34:14  GET: array (
+)
+2016-04-01 08:34:16  POST: array (
+)
+2016-04-01 08:34:16  GET: array (
+  'param' => 'gis',
+)
+2016-04-01 08:34:16  response: stdClass::__set_state(array(
+   'error_response' => 
+  stdClass::__set_state(array(
+     'code' => '40002',
+     'msg' => 'Invalid Arguments',
+     'sub_code' => 'isv.invalid-app-id',
+     'sub_msg' => '无效的AppID参数',
+  )),
+))
+2016-04-05 04:21:28  POST: array (
+)
+2016-04-05 04:21:28  GET: array (
+)
+2016-04-05 04:21:30  POST: array (
+)
+2016-04-05 04:21:30  GET: array (
+  'param' => 'qr',
+)
+2016-04-05 04:21:31  response: stdClass::__set_state(array(
+   'error_response' => 
+  stdClass::__set_state(array(
+     'code' => '40002',
+     'msg' => 'Invalid Arguments',
+     'sub_code' => 'isv.invalid-app-id',
+     'sub_msg' => '无效的AppID参数',
+  )),
+))
+2016-04-05 04:26:53  POST: array (
+)
+2016-04-05 04:26:53  GET: array (
+)
+2016-04-05 04:26:55  POST: array (
+)
+2016-04-05 04:26:55  GET: array (
+  'param' => 'qr',
+)
+2016-04-05 04:26:55  response: stdClass::__set_state(array(
+   'error_response' => 
+  stdClass::__set_state(array(
+     'code' => '40003',
+     'msg' => 'Insufficient Conditions',
+     'sub_code' => 'isv.missing-signature-config',
+     'sub_msg' => '验签出错, 未配置对应签名算法的公钥或者证书',
+  )),
+   'sign' => 'iYLCtEUVTN8fnVnFGkK/0a3CafFqqOsFhHchI+ahhTml3soQPvz/O8GsKN5g4nYkgpPZk2KaFe5YtK137r0+cIPD7zF1M6qpQZZJp5/ySK5bLJCAufECJvhWa85r/8wXXYDoFTQGpImnjAk5JdqPcp3+5uzOaEG+cNt9pLx6ASc=',
+))

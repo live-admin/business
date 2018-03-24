@@ -1,0 +1,129 @@
+.colourHouse-bg{
+    height:1080px;
+    background:url(../img/colourHouse_bg.jpg) no-repeat center top;
+}
+.introduce{
+    width:820px;
+    margin:295px auto 0;
+    text-align: right;
+    font-size: 24px;
+    color:#fff;
+}
+.introduce > p{
+    width:819px;
+    height:90px;
+    background:url(../img/earlyBuyHouse_font.png) no-repeat;
+} 
+.introduce-info{
+    margin-top:30px;
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+}
+.introduce-info p{
+    line-height:2;
+}
+.introduce a{
+    width:220px;
+    height:60px;
+    line-height: 60px;
+    background-color: #27a2f0;
+    display: inline-block;
+    text-align: center;
+    border-radius: 5px;
+    color:#fff;
+}
+.detail-introduce{
+    width: 1366px;
+    margin:0 auto;
+}
+.detail-introduce{
+    width:100%;
+}
+.item:nth-child(1),.item:nth-child(3){
+    background: #fff;
+}
+.item:nth-child(2),.item:nth-child(4){
+    background: #f6f6f7;
+}
+.descript{
+    text-align: center;
+}
+.item h3{
+    color:#333b46;
+    font-size: 30px;
+    margin:0 auto;
+    padding-top: 160px;
+    padding-bottom: 20px;
+    text-align: center;
+}
+.descript{
+    padding-top:40px;
+    padding-bottom: 170px;
+}
+.descript p{
+    line-height: 2;
+    font-size:16px;
+}
+.recommomHose{
+
+}
+.recommomHose ul{
+    width:100%;
+    width:1366px;
+    margin:0 auto;
+    overflow: hidden;
+    margin-top:60px;
+}
+.recommomHose ul li{
+    float:left;
+    margin-right:70px;
+    margin-left:70px;
+}
+.pic_show{
+    position: relative; 
+}
+.pic_show img{
+    width:300px;
+    height:250px;
+}
+.pic_show p{
+    width:80px;
+    height:80px;
+    background-color:#fe6262;
+    font-size: 22px;
+    text-align: center;
+    line-height: 80px;
+    color:#fff;
+    border-radius: 50%;
+    position: absolute;
+    right:-20px;
+    bottom:-20px;
+}
+.describe{
+    width:300px;
+    margin-top:30px;
+    margin-bottom: 80px;
+}
+.describe p{
+    color:#333b46;
+    font-size: 14px;
+    line-height: 1.7;
+}
+.describe p:nth-child(1){
+    font-size: 20px;
+}
+.detail-btn{
+    text-align: center;
+}
+.detail-btn a{
+    font-size: 20px;
+    color:#fff;
+    width:220px;
+    height:60px;
+    line-height: 60px;
+    display: inline-block;
+    background-color:#27a2f0;
+    border-radius: 5px;
+    margin-bottom: 78px;
+    margin-top: 20px;
+}

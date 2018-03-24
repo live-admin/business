@@ -1,0 +1,112 @@
+.colourPayFee-bg{
+    height:1080px;
+    background:url(../img/colourPayFee_bg.jpg) no-repeat center top;
+}
+.introduce{
+	margin-top:100px;
+	margin-bottom: 150px;
+	text-align: center;
+	font-size: 20px;
+}
+.introduce p{
+	margin-top:20px;
+	color:#fff;
+
+}
+.introduce .descript p:nth-child(1){
+	font-size: 30px;
+}
+.introduce-info p:last-child{
+	font-size:14px; 
+}
+.introduce .descript .self-line{
+	margin:50px auto;
+}
+.fee-list{
+	width:1080px;
+	margin:0 auto;
+	margin-top:60px;
+}
+.fee-list ul{
+	
+	overflow: hidden;
+}
+.fee-list ul li{
+	float: left;
+	width:175px;
+	padding:0 90px;
+}
+.fee-list ul li em{
+	display: block;
+	margin:0 auto;
+}
+.fee-list ul li:nth-child(1) em{
+	width:50px;
+	height:50px;
+	background: url(../img/wuyefei_icon.png) no-repeat;
+}
+.fee-list ul li:nth-child(2) em{
+	width:54px;
+	height:49px;
+	background: url(../img/yujiaofei_icon.png) no-repeat;
+}
+.fee-list ul li:nth-child(3) em{
+	width:62px;
+	height:40px;
+	background: url(../img/tingchefei_icon.png) no-repeat;
+}
+.fee-list ul li p:nth-child(2){
+	font-size: 18px;
+}
+.fee-list ul li p:nth-child(3){
+	font-size: 14px;
+}
+.self-btn a{
+	margin-top:150px;
+}
+.detail-introduce{
+	width:1200px;
+	margin:60px auto 120px;
+}
+.detail-introduce ul{
+	overflow: hidden;
+}
+.detail-introduce ul li{
+	width:260px;
+	height:260px;
+	float: left;
+	margin:20px;
+	color:#333b46;
+}
+.detail-introduce ul li h3{
+	font-style: normal;
+	font-size: 24px;
+}
+.detail-introduce ul li p{
+	font-size: 16px;
+	line-height: 2.3;
+}
+.detail-introduce ul li p:nth-child(1){
+	margin-top:25px;
+}
+.detail-introduce ul li:nth-child(2){
+	background:url(../img/buyPayFee01.jpg) no-repeat;
+}
+.detail-introduce ul li:nth-child(3){
+	background:url(../img/buyPayFee02.jpg) no-repeat;
+}
+.detail-introduce ul li:nth-child(6){
+	background:url(../img/buyPayFee03.jpg) no-repeat;
+}
+.detail-introduce ul li:nth-child(7){
+	background:url(../img/buyPayFee04.jpg) no-repeat;
+}
+.detail-introduce ul li:nth-child(1),
+.detail-introduce ul li:nth-child(5){
+	text-align: right;
+	
+}
+.detail-introduce ul li:nth-child(4),
+.detail-introduce ul li:nth-child(8){
+	text-align: left;
+}

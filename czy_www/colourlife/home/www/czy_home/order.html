@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>我的订单</title>
+	<link rel="stylesheet" href="css/jquery-ui.min.css"/>
+	<link type="text/css" rel="stylesheet" href="css/public.css" />
+	<link type="text/css" rel="stylesheet" href="css/order.css" />
+  <style>
+  	.ui-widget.ui-widget-content{
+  		border-radius: 7px;
+  		color:#767676;
+  	}
+  	.ui-datepicker{
+  		width:auto;
+  	}
+  	.ui-datepicker td{
+  		min-width:32px; 
+  	}
+  	.ui-datepicker td a{
+  		text-align:center;
+  		padding:.4em;
+  		border-radius: 3px;
+  	}
+  	.ui-state-highlight, .ui-widget-content .ui-state-highlight{
+	    background: #41CAC0 !important;
+	    color: #fff;
+  	}
+  	.ui-state-active, .ui-widget-content .ui-state-active{
+    	background: #4facf4 !important;
+  	}
+  	.ui-widget-header{
+	    border:0;
+		background: #fff;
+		color: #333;
+		font-weight:normal;
+  	}
+  	.ui-state-default, .ui-widget-content .ui-state-default{
+  		border:0;
+  		background: #fff;
+  	}
+  	.ui-datepicker select.ui-datepicker-month{
+	  	border: 1px solid #ddd;
+	    border-radius: 3px;
+	    text-align:center;
+	}
+	.ui-datepicker th{
+		font-weight: normal;
+	}
+	.ui-datepicker .ui-datepicker-title{
+		color:#767676;
+	}
+	.ui-datepicker select.ui-datepicker-month{
+		color:#767676;
+		width:30%;
+		text-indent: .3em;
+	}
+	  /*css___loading*/
+	@-webkit-keyframes ball-spin-fade-loader {
+		50% {
+			opacity: 0.3;
+			-webkit-transform: scale(0.4);
+			transform: scale(0.4); }
+
+		100% {
+			opacity: 1;
+			-webkit-transform: scale(1);
+			transform: scale(1); } }
+
+	@keyframes ball-spin-fade-loader {
+		50% {
+			opacity: 0.3;
+			-webkit-transform: scale(0.4);
+			transform: scale(0.4); }
+
+		100% {
+			opacity: 1;
+			-webkit-transform: scale(1);
+			transform: scale(1); } }
+
+	.ball-spin-fade-loader {
+		position: relative; }
+	.ball-spin-fade-loader > div:nth-child(1) {
+		top: 25px;
+		left: 0;
+		-webkit-animation: ball-spin-fade-loader 1s 0s infinite linear;
+		animation: ball-spin-fade-loader 1s 0s infinite linear;
+	}
+	.ball-spin-fade-loader > div:nth-child(2) {
+		top: 17.04545px;
+		left: 17.04545px;
+		-webkit-animation: ball-spin-fade-loader 1s 0.12s infinite linear;
+		animation: ball-spin-fade-loader 1s 0.12s infinite linear;
+	}
+	.ball-spin-fade-loader > div:nth-child(3) {
+		top: 0;
+		left: 25px;
+		-webkit-animation: ball-spin-fade-loader 1s 0.24s infinite linear;
+		animation: ball-spin-fade-loader 1s 0.24s infinite linear;
+	}
+	.ball-spin-fade-loader > div:nth-child(4) {
+		top: -17.04545px;
+		left: 17.04545px;
+		-webkit-animation: ball-spin-fade-loader 1s 0.36s infinite linear;
+		animation: ball-spin-fade-loader 1s 0.36s infinite linear;
+	}
+	.ball-spin-fade-loader > div:nth-child(5) {
+		top: -25px;
+		left: 0;
+		-webkit-animation: ball-spin-fade-loader 1s 0.48s infinite linear;
+		animation: ball-spin-fade-loader 1s 0.48s infinite linear;
+	}
+	.ball-spin-fade-loader > div:nth-child(6) {
+		top: -17.04545px;
+		left: -17.04545px;
+		-webkit-animation: ball-spin-fade-loader 1s 0.6s infinite linear;
+		animation: ball-spin-fade-loader 1s 0.6s infinite linear;
+	}
+	.ball-spin-fade-loader > div:nth-child(7) {
+		top: 0;
+		left: -25px;
+		-webkit-animation: ball-spin-fade-loader 1s 0.72s infinite linear;
+		animation: ball-spin-fade-loader 1s 0.72s infinite linear;
+	}
+	.ball-spin-fade-loader > div:nth-child(8) {
+		top: 17.04545px;
+		left: -17.04545px;
+		-webkit-animation: ball-spin-fade-loader 1s 0.84s infinite linear;
+		animation: ball-spin-fade-loader 1s 0.84s infinite linear;
+	}
+	.ball-spin-fade-loader > div {
+		background-color: #279fcf;
+		width: 15px;
+		height: 15px;
+		border-radius: 100%;
+		margin: 2px;
+		-webkit-animation-fill-mode: both;
+		animation-fill-mode: both;
+		position: absolute;
+	}
+	.loader{
+		display: none;
+		float: right;
+		margin-right: 50px;
+	}
+  </style>
+</head>
+<body>
+<!--彩之云APP-->
+<div class="czy_app">
+    <ul>
+        <li>
+            <span class="close_czyAPP"></span>
+        </li>
+        <li>
+            <div></div>
+            <div></div>
+            <p>了解更多内容，请扫描二维码，下载彩之云APP</p>
+            <div class="come_onczy">
+                <button type="button">进入我的彩之云</button>
+            </div>
+        </li>
+    </ul>
+</div>
+<!--客服电话-->
+<div class="czy_Customerservice">
+    <ul>
+        <li>
+            <span class="close_Customerservice"></span>
+        </li>
+        <li>
+            <div></div>
+            <!--<div></div>-->
+            <p>彩之云客服服务电话：4008-893-893</p>
+        </li>
+    </ul>
+</div>
+<!-- <div class="full-bg buyElectricity-bg"> -->
+    <div class="content-wrap order-wrap">
+		<div class="nav">
+			<div class="login" style="width:100%;height:45px;">
+				<ul class="Customers">
+					<li id="userInfo">你好，<span class="twoczy_username"></span>&nbsp;&nbsp;<span class="Sign_out">退出</span>&nbsp;</li>
+					<li id="orderInfo"><a href="order.html">我的订单</a></li>
+					<li class="app_Customer"><a href="javascript:void(0)">联系客服</a></li>
+				</ul>
+			</div>
+			<ul class="headers">
+				<li>
+					<img src="img/czy_logos.png" alt="">
+				</li>
+				<li>
+					<ul class="navigation">
+						<!--<li><a href="czy_home/colourProduct.html">产品介绍</a></li>-->
+						<li class="search" style="margin-right: 0px;">
+							<img src="img/sous.png" alt="">
+						</li>
+						<li class="colourCommunity"><a href="javascript:;">彩.社区</a></li>
+						<li><a href="buyElectricity.html">买电</a></li>
+						<li><a href="colourPayFee.html">缴费</a></li>
+						<li><a href="http://www.qianshenghua.com/colourlifecenter/index.do">彩富人生</a></li>
+						<li><a href="colourHouse.html">彩住宅</a></li>
+						<li style="margin-left:0;"><a href="../index.html">首页</a></li>
+					</ul>
+					<ul class="header_list" style="display: none">
+						<li style="margin-right: 0px;" class="search_two">
+							<img src="Community/images/sous.png" alt="">
+						</li>
+						<li><a href="Community/colour_sports.html">彩.竞技</a></li>
+						<li><a href="Community/colour_live.html">彩.直播</a></li>
+						<li><a href="Community/colour_comic.html">动.漫</a></li>
+						<li><a href="Community/colour_activities.html">社区活动</a></li>
+						<li><a href="Community/colour_play.html">演出剧</a></li>
+						<li><a href="Community/colour_community.html">彩.社区</a></li>
+						<li style="margin-left:0;"><a href="./../index.html">首页</a></li>
+					</ul>
+					<ul class="sou_banner">
+						<li></li>
+						<li>
+							<input type="text" value="请输入搜索内容" onfocus="this.value='';">
+						</li>
+						<li></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+    </div>
+	<div class="container">
+		<div class="menubar">
+			<div class="wrap">
+				<h3>我的订单</h3>
+				<span class="search_btn" @click="search">搜索</span>
+				<div class="loader">
+					<div class="loader-inner ball-spin-fade-loader">
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+				<div class="dateTime item">
+					<label>时间：</label>
+					<ul @click="dateSelect">
+						<li>
+							<input type="text" id="from" readonly="readonly" value="" class="starDate" placeholder="请输入开始时间" v-model="startDate"><i></i>&nbsp;&nbsp;至
+						</li>
+						<li>
+							<input type="text" id="to"  readonly="readonly" value="" class="endDate" placeholder="请输入结束时间" v-model="endDate"><i></i>
+							
+						</li>
+					</ul>
+					<ul>
+						<li v-for="(item,index) in timeInfo" :class="{active:index == timeCurrentIndex}" @click="timeSelect(item.value,index)" v-text="item.name" ></li>
+					</ul><!--  -->
+				</div>
+				<div class="category item">
+					<label>分类：</label>
+					<ul>
+						<li v-for="(item,index) in categoryInfo" :class="{active:index == categoryCurrentIndex}" @click="categorySelect(item.value,index)" v-text="item.name">全部</li>
+					</ul>
+				</div>
+				<div class="state item">
+					<label>状态：</label>
+					<ul>
+						<li v-for="(item,index) in menuInfo" :class="{active:index == menuCurrentIndex}" @click="menuSelect(item.value,index)" v-text="item.name">全部</li>
+						
+					</ul>
+				</div>
+			</div>
+		</div>
+		
+		<div class="content_table elec_table">
+			<div class="wrap">
+				<table>
+					<thead>
+					 	<tr>
+					 		<th>分类</th><th>创建时间</th><th>名称 | 对方 | 订单号</th><th>金额</th><th>状态</th><th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr v-for="(item,index) in orderlist" v-if="orderlist.length != 0">
+							<td>
+								<span v-text="item.category"></span>
+							</td>
+							<td>
+								<p v-text="item.create_time"></p>
+							</td>
+							<td>
+								<p v-if="item.meter != null"><span v-text="item.meter_address"></span>-电表号：<span v-text="item.meter"></span></p>
+								<p><span v-text="item.type">彩之云e费通</span> | 订单号：<span>102012010201002102</span></p>
+							</td>
+							<td v-text="item.amount">-590.00</td>
+							<td :class="{waitPay:item.status_name == '待付款'}" v-text="item.status_name"></td>
+							<td>
+								<span class="detail_content active"  v-if="item.status_name != '待付款'" @click="details(item.id)">详情</span><!--  @mouseover="showDetail(index)" @mouseout="hideDetail(index)" -->
+								<ul class="detail" v-else @mouseover="dowmArrow(index)" @mouseout="comeout(index)">
+								<!--  class="{hide:currentdetail == index}" -->
+									<li class="go_buy" @click="Gopayment(item.id)">
+                                        <span>去付款</span>
+                                        <span class="down_arrow" @click="dowmArrow(index)"></span>
+                                    </li>
+									<li @click="Godetails(item.id)">详情</li>
+									<li @click="Goclose(item.id)">交易关闭</li>
+								</ul>
+							</td>
+						</tr>
+						<tr>
+                            <td colspan="6" v-if="orderlist.length == 0">{{error_information}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div> 
+		<div class="pages">
+			<div class="fLeft">
+				<!--<span>联系我们</span>-->
+			</div>
+			<div class="fRight">
+				<p>当前第<span  v-text="page.currentpage"></span>/<span v-text="Math.ceil(page.count/8)"></span>,每页<span v-text="page.pageSize"></span>条,共<span v-text="page.count"></span>条记录</p>
+				<ul class="page_wrap">
+					<li><a href="javascript:void(0);" @click="getIndexPage">首页</a></li>
+					<li><a href="javascript:void(0);" @click="getPerPage">上一页</a></li>
+					<li><a href="javascript:void(0);" @click="getNextPage">下一页</a></li>
+					<li><a href="javascript:void(0);" @click="getLastPage">尾页</a></li>
+					<li>
+						<input type="text" value="" class="turnpage" @blur="initNumber">
+					</li>
+					<li><a @click="turnPage">跳转</a></li><!-- href="javascript:void(0);" -->
+				</ul>
+			</div>
+		</div>
+	</div>
+	
+	<div class="new_footer">
+	    <ul class="new_case">
+	        <li>深圳市彩之云网络科技有限公司</li>
+	        <li>网站备案号：<a target="_blank" href="http://www.miitbeian.gov.cn">粤ICP备13038151号-2</a> &nbsp;&nbsp;&nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;&nbsp;经营许可证号：粤B2-20130390</li>
+	    </ul>
+	</div>
+	
+	<!-- 日历插件 -->
+    <script type="text/javascript" src="js/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="js/md5.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="js/jquery.ui.datepicker-zh-CN.js"></script>
+	<script type="text/javascript" src="js/vue.js"></script>
+	<script type="text/javascript" src="js/search.js"></script>
+  	<script type="text/javascript" src="js/order.js"></script>
+<script>
+
+$(".fLeft span").click(function(){
+	$(".czy_Customerservice").css("display","block")
+});
+$(function() {
+    $( "#from" ).datepicker({
+      defaultDate: "+1w",
+      onClose: function( selectedDate ) {
+        $( "#to" ).datepicker("option", "minDate", selectedDate);
+      }
+     });//
+    $( "#to" ).datepicker({
+      defaultDate: "+1w",
+      onClose: function( selectedDate ) {
+        $( "#from" ).datepicker( "option", "maxDate", selectedDate);
+      	}
+    });
+ });
+
+
+</script>	
+</body>
+</html>

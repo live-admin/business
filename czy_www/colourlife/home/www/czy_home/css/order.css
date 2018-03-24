@@ -1,0 +1,299 @@
+.menubar{
+	width:100%;
+	background-color: #f4f5fb;
+}
+.wrap{
+	width:1100px;
+	margin:0 auto;
+	color:#373d41;
+
+	position:relative;
+}
+.wrap .search_btn{
+	padding: 8px 24px;
+	display: block;
+	color: #fff;
+	font-size: 16px;
+	position: absolute;
+	top: 40px;
+	right: 0;
+	background: #4facf4;
+	border-radius: 3px;
+	cursor:pointer;
+}
+.wrap h3{
+	height:90px;
+	line-height: 90px;
+	font-size: 22px;
+	font-weight:normal;
+}
+.wrap .item{
+	height:80px;
+	line-height: 80px;
+	overflow: hidden;
+	font-size: 18px;
+}
+.wrap h3,.wrap .item{
+	border-bottom: 1px solid #edeff3;
+	padding-left:40px;
+}
+.wrap .item label{
+	margin-right: 20px;
+	float: left;
+}
+.wrap .item ul{
+	float: left;
+	overflow: hidden;
+}
+.item ul li{
+	display: inline;
+	padding:0 15px;
+}
+.item ul li:hover{
+	cursor: pointer;
+	color:#4facf4;
+}
+.item ul li:nth-child(1){
+	color:#373d41;
+	padding-right:0;
+}
+.item ul li:nth-child(1),.item ul li:nth-child(2){
+	position: relative;
+}
+.dateTime ul li input{
+	width:170px;
+	height:30px;
+	line-height: 30px;
+	border:1px solid #bfc7cc;
+	border-radius: 8px;
+	outline: none;
+	text-indent: 8px;
+	color:#767676;
+	background:url(../img/calendar.png) no-repeat 140px center;
+}
+.active{
+	color:#4facf4 !important;
+	cursor:pointer;
+}
+.content_table{
+	width:100%;
+	background-color: #fff;
+	max-height:890px;
+	overflow: hidden;
+	min-height: 230px;
+}
+.content_table table{
+	width:100%;
+	font-size:14px;
+	border-collapse: collapse;
+/*	border:1px solid #f00;*/
+	table-layout: fixed;
+}
+.content_table table tr{
+	border-bottom: 1px solid #ccc;
+}
+.content_table table thead tr th{
+	height:85px;
+	font-size: 16px;
+}
+.content_table table tr{
+	border-bottom:1px solid #e6e9ea;
+}
+.content_table table tbody tr{
+	height:100px;
+	font-size: 14px;
+}
+.wrap table thead tr th,.wrap table tbody tr td{
+	text-align:center;
+}
+.wrap table tr td:nth-child(1),.wrap table tr td:nth-child(2){
+	width:120px;
+}
+.wrap table tr td:nth-child(2) p{
+	display: inline-block;
+	width: 80px;
+	line-height: 2;
+	text-align: center;
+}
+.wrap table tr th:nth-child(3),.wrap table tr td:nth-child(3){
+	text-align: left;
+	width:400px;
+}
+.wrap table tr td:nth-child(4){
+	width:180px;
+}
+.wrap table tr td:nth-child(5),.wrap table tr td:nth-child(6){
+	width:150px;
+}
+.wrap table tr td:nth-child(2) p:nth-child(2),
+.wrap table tr td:nth-child(3) p:nth-child(2){
+	margin-top:10px;
+	color:#a3aaae;
+}
+.wrap table tbody tr td:nth-child(1) span{
+	width:50px;
+	height:50px;
+	line-height: 50px;
+	background-color:#53cfee;
+	border-radius: 50%;
+	display: inline-block;
+	text-align: center;
+	color:#fff;
+}
+.wrap table tr td:nth-child(4){
+	font-size: 20px;
+	color:#2d3e50;
+}
+.waitPay{
+	color: #ff6f36;
+}
+.hide{
+	display: none;
+}
+.pages{
+	width:1100px;
+	height:140px;
+	margin:0 auto;
+	font-size:12px;
+}
+.pages div{
+	margin-top:30px;
+}
+.fLeft{
+	float:left;
+}
+.fLeft span{
+	color:#4facf4;
+	
+}
+.fRight{
+	float:right;
+}
+.fRight p{
+	color:#7c868d;
+	text-align:right;
+	margin-bottom: 20px;
+}
+.fRight ul{
+	font-size: 0;
+}
+.fRight ul li{
+	border:1px solid #4facf4;
+	display: inline-block;
+	border-radius: 3px;
+	margin-left:8px;
+	padding:5px 10px;
+	text-align:center;
+}
+.fRight ul li a{
+	color:#4facf4;
+	text-decoration: none;
+	font-size:12px;
+}
+.fRight ul li input{
+	border:0;
+	width:30px;
+	outline:0;
+}
+footer{
+	width:100%;
+	height:100px;
+	line-height: 100px;
+	font-size: 12px;
+	color:#fff;
+	background-color:#35444d;
+	text-align: center;
+}
+
+/*.paySuc_content{
+	background-color:#f2f3f4;
+}
+.showpng{
+	text-align:center;
+}
+.showpng img{
+	width:100px;
+	height:100px;
+	margin: 30px auto 20px;
+}
+.showpng p{
+	padding-bottom: 50px;
+	font-size: 22px;
+	color:#00aaee;
+}
+.clearfix{
+	clear:both;
+	overflow: hidden;
+}
+.suc_info{
+	width:100%;
+	margin-top:40px;
+}
+.suc_info .wrap .fLeft{
+	margin-left:40px;
+}
+.suc_info .wrap .fRight{
+	margin-right:40px;
+}
+.suc_info .fLeft p:nth-child(1){
+	font-size: 14px;
+	margin-top:25px;
+}
+.suc_info .fLeft p:nth-child(2){
+	font-size: 22px;
+	margin-top:10px;
+}
+.suc_info .fRight p{
+	font-size: 12px;
+	margin-top:25px;
+}
+.bgColor{
+	background-color: #f2f3f4;
+	height:106px;
+}*/
+/*没付款样式*/
+.detail{
+	width:80%;
+	margin:0 auto;
+}
+.go_buy{
+	position: relative;
+	display:block!important;
+}
+.go_buy span:nth-child(2){
+	float:right;
+	margin-top: -16px;
+}
+.go_buy span:nth-child(1){
+	height:20px;
+	display:block;!important;
+	color:#4FACF4;
+}
+.down_arrow{
+	display: block;
+	width:13px;
+	height:10px;
+	background:url("../img/down_arrow.png")no-repeat;
+}
+.detail li{
+	display:none;
+	cursor:pointer;
+}
+.into{
+	border-radius:10px;!important;
+}
+.into li{
+	display:block;!important;
+	height:30px;
+	line-height:30px;
+}
+.into li:hover{
+	color:#fff;!important;
+	background:#00AAEE;
+}
+.into li:nth-child(1){
+	background:#00AAEE;
+}
+.into li:nth-child(1) span{
+	color:#fff;!important;
+}

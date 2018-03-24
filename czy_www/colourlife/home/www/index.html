@@ -1,0 +1,439 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="P3P" content='CP="IDC DSP COR CURa ADMa  OUR IND PHY ONL COM STA"'>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="description" content="彩之云由彩生活网络服务有限公司研发，为彩生活社区业主提供各类生活、家居服务的一站式服务,可有效帮助用户解决与生活息息相关的问题。包含物业服务、B2F商业服务、虚拟服务、商品服务、智能管家和连锁经营的社区服务等。"/>
+  <meta name="keywords" content="彩之云,彩生活,彩住宅,把社区服务做到家,物业,深圳物业"/>
+  <title>彩之云首页</title>
+  <link rel="stylesheet" href="czy_home/css/idangerous.swiper.css">
+   <link href="czy_home/css/slide-unlock.css" rel="stylesheet">
+  <link rel="stylesheet" href="czy_home/css/style.css">
+   <style>
+       .new_case{
+        margin-top:30px;
+       }
+       .new_case li{
+        line-height:1.5;
+       }
+   </style>
+</head>
+<body>
+<!--首页导航-->
+    <div class="nav">
+        <div class="login" style="width:100%;height:45px;">
+            <ul class="Customers">
+                <li id="userInfo">你好，<span class="twoczy_username"></span>&nbsp;&nbsp;<span class="Sign_out">退出</span>&nbsp;</li>
+                <li id="orderInfo"><a href="czy_home/order.html">我的订单</a></li>
+                <li><a href="javascript:void(0)">联系客服</a></li>
+            </ul>
+        </div>
+        <ul class="headers">
+            <li>
+                <img src="czy_home/img/czy_logos.png" alt="">
+            </li>
+            <li>
+                <ul class="navigation">
+                    <li class="search" style="margin-right: 0px;">
+                        <img src="czy_home/img/sous.png" alt="">
+                    </li>
+                    <li class="colourCommunity"><a href="czy_home/Community/colour_community.html">彩.社区</a></li>
+                    <li><a href="czy_home/buyElectricity.html">买电</a></li>
+                    <li><a href="czy_home/colourPayFee.html">缴费</a></li>
+                    <li><a href="http://www.qianshenghua.com/colourlifecenter/index.do">彩富人生</a></li>
+                    <li><a href="czy_home/colourHouse.html">彩住宅</a></li>
+                    <li  id="selected"  style="margin-left:0;"><a href="index.html">首页</a></li>
+                    <!--<li><a href="czy_home/colourProduct.html">产品介绍</a></li>-->
+                </ul>
+                <!--<ul class="header_list" style="display: none">-->
+                    <!--<li style="margin-right: 0px;" class="search_two">-->
+                        <!--<img src="czy_home/Community/images/sous.png" alt="">-->
+                    <!--</li>-->
+                    <!--<li><a href="czy_home/Community/colour_sports.html">彩.竞技</a></li>-->
+                    <!--<li><a href="czy_home/Community/colour_live.html">彩.直播</a></li>-->
+                    <!--<li><a href="czy_home/Community/colour_comic.html">动.漫</a></li>-->
+                    <!--<li><a href="czy_home/Community/colour_activities.html">社区活动</a></li>-->
+                    <!--<li><a href="czy_home/Community/colour_play.html">演出剧</a></li>-->
+                    <!--<li><a href="czy_home/Community/colour_community.html">彩.社区</a></li>-->
+                    <!--<li style="margin-left:0;"><a href="index.html" style="color:#27a2f0">首页</a></li>-->
+                <!--</ul>-->
+                <ul class="sou_banner">
+                    <li></li>
+                    <li>
+                        <input type="text" value="请输入搜索内容" onfocus="this.value='';">
+                    </li>
+                    <li></li>
+                </ul>
+            </li>
+            <li>
+                <ul class="upper_home" style="display: none">
+                    <li class="czy_twoentry"><a href="javascript:void(0)">登录</a></li>
+                    <li class="home_twopage"><a href="javascript:void(0)">注册</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+<!--登录注册-->
+    <div style="clear:none"></div>
+    <div class="mask" style="display: none">
+        <ul class="entry">
+            <li>
+                <span class="entry_close"></span>
+            </li>
+            <li>
+               <p class="entry_czyhome">登录彩之云</p>
+               <div class="number_error">
+                     <p><span class="ljd_alert"></span>
+                         <!--，还有<span class="error_num"></span>次机会-->
+                     </p>
+               </div>
+               <div class="entry_czy">
+                   <div>
+                       <div>
+                          <div></div>
+                       </div>
+                       <input type="text" value="" placeholder="请输入您的手机号码" name="username" maxlength="11" id="dl_czyphone"/>
+                   </div>
+                   <div>
+                       <div>
+                           <div></div>
+                       </div>
+                       <input name="" type="text" value="" placeholder="密码" id="password"/>
+                       <input name="" type="password" style="display:none;" id="passwords" autocomplete="off"  />
+                   </div>
+                   <!--<p><a href="javascript:void(0)" class="forgot_password">忘记密码?</a></p>-->
+                   <div id="entry_yzm">
+                       <div id="slider">
+                           <div id="slider_bg"></div>
+                           <span id="label">>></span>
+                           <span id="labelTip">拖动滑块验证</span>
+                       </div>
+                   </div>
+                   <div id="entry_czyend">
+                       <p>登录</p>
+                       <div id="loading">
+                           <span></span>
+                           <span></span>
+                           <span></span>
+                           <span></span>
+                           <span></span>
+                       </div>
+                   </div>
+
+                   <p class="czy_mfzc">免费注册</p>
+               </div>
+            </li>
+        </ul>
+        <!--找回密码-->
+        <!--<ul class="entry"  style="display: none">-->
+            <!--<li>-->
+                <!--<span class="back_close"></span>-->
+            <!--</li>-->
+            <!--<li>-->
+                <!--<p>找回密码</p>-->
+                <!--<div class="back_czy">-->
+                    <!--<div>-->
+                        <!--<div>-->
+                            <!--<div></div>-->
+                        <!--</div>-->
+                        <!--<input type="text" value="请输入您的手机号码" name="username" onfocus="this.value='';" onkeydown="onlyNum();" style="ime-mode:Disabled" maxlength="11" id="zhmi_czy" autocomplete="off" />-->
+                    <!--</div>-->
+                    <!--<div id="back_yzm">-->
+                        <!--<div>-->
+                            <!--<div></div>-->
+                        <!--</div>-->
+                        <!--<div>-->
+                            <!--<input type="text" name="username" id="pw"  placeholder="验证码" autocomplete="off" >-->
+                        <!--</div>-->
+                        <!--<div>-->
+                            <!--<p>获取验证码</p>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <!--<div>-->
+                        <!--<div>-->
+                            <!--<div></div>-->
+                        <!--</div>-->
+                        <!--<input name="" type="text" value="新密码" id="new" />-->
+                        <!--<input name="" type="password" style="display:none;" id="news" autocomplete="off"  />-->
+                    <!--</div>-->
+                    <!--<div>-->
+                        <!--<div>-->
+                            <!--<div></div>-->
+                        <!--</div>-->
+                        <!--<input name="" type="text" value="请再次输入一次新密码" id="nextnew"/>-->
+                        <!--<input name="" type="password" style="display:none;" id="nextnews" autocomplete="off"  />-->
+                    <!--</div>-->
+                    <!--<div id="back_czyend">-->
+                        <!--<p>确认</p>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</li>-->
+        <!--</ul>-->
+    </div>
+    <div class="czy_register">
+            <ul>
+                <li>
+                    <span class="close_czyregister"></span>
+                </li>
+                <li>
+                    <p>注册彩之云</p>
+                    <div>
+                        <div><p>手机号</p></div>
+                        <div>
+                            <input type="text" value=""  placeholder="请输入您的手机号码"  maxlength="11" id="zcczy_phone" autocomplete="off"/>
+                             <p class="zc_phone"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <div><p>短信验证码</p></div>
+                        <div>
+                            <input type="text" value="" placeholder="请输入验证码"  maxlength="4" id="zcczy_yzm" autocomplete="off"/>
+                            <input type="button" class="btn_Code" value="获取验证码">
+                            <p class="zc_code"></p>
+                        </div>
+
+                    </div>
+                    <div>
+                        <div><p>登录密码</p></div>
+                        <div>
+                            <input name="" type="text" value="" placeholder="密码位8-30位字母加数字" id="zcone_password" />
+                            <input name="" type="password" id="one_password" style="display:none" name="password" autocomplete="off" />
+                            <p class="zc_none"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <div><p>再输入一次</p></div>
+                        <div>
+                            <input name="" type="text" value="" placeholder="密码位8-30位字母加数字" onfocus="this.placeholder='';"id="zctwo_password" />
+                            <input name="" type="password" id="two_password" style="display:none" name="repassword" autocomplete="off"/>
+                            <p class="zctwo_none"></p>
+                        </div>
+                    </div>
+                    <!--<div>-->
+                        <!--<div>-->
+                            <!--&lt;!&ndash;<p>常用地址(*非必填*)</p>&ndash;&gt;-->
+                        <!--</div>-->
+                        <!--<div id="address">-->
+                            <!--&lt;!&ndash;<select id="selProvince">&ndash;&gt;-->
+                                <!--&lt;!&ndash;<option value="0">&#45;&#45;请选择省份&#45;&#45;</option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</select>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<select id="selCity">&ndash;&gt;-->
+                                <!--&lt;!&ndash;<option value="0">&#45;&#45;请选择城市&#45;&#45;</option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</select>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<select id="selDistrict">&ndash;&gt;-->
+                                <!--&lt;!&ndash;<option value="0">&#45;&#45;请选择区/县&#45;&#45;</option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</select>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<select id="quarters">&ndash;&gt;-->
+                                <!--&lt;!&ndash;<option value="0">&#45;&#45;请选择小区&#45;&#45;</option>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</select>&ndash;&gt;-->
+                            <!--<div class="czy_fwxy">-->
+                                <!--<div class="div1">-->
+                                    <!--<input type="checkbox" name="cb" id="specialInput" checked="checked"/>-->
+                                    <!--<label for="specialInput" class="label active">-->
+                                <!--</div>-->
+                                <!--<a href="https://www.colourlife.com/xieyiApp" target="_blank"><span id="agree">&nbsp;&nbsp;&nbsp;同意&nbsp;</span>《彩之云服务协议》</a>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <div>
+                        <button type="button" class="btn" >
+                            <span class="completed">完成</span>
+                            <div id="loading_register">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </button>
+                        <p class="error_call">错误提示:<span class="error_calls"></span></p>
+                    </div>
+                </li>
+                <li></li>
+            </ul>      
+    </div>
+<!--彩之云APP-->
+    <!--<div class="czy_app">-->
+        <!--<ul>-->
+            <!--<li>-->
+                <!--<span class="close_czyAPP"></span>-->
+            <!--</li>-->
+            <!--<li>-->
+                <!--<div></div>-->
+                <!--<div></div>-->
+                <!--<p>了解更多内容，请扫描二维码，下载彩之云APP</p>-->
+                <!--<div class="come_onczy">-->
+                    <!--<button type="button">进入我的彩之云</button>-->
+                <!--</div>-->
+            <!--</li>-->
+        <!--</ul>-->
+    <!--</div>-->
+<!--客服电话-->
+    <div class="czy_Customerservice">
+    <ul>
+        <li>
+            <span class="close_Customerservice"></span>
+        </li>
+        <li>
+            <div></div>
+            <!--<div></div>-->
+            <p>彩之云客服服务电话：4008-893-893</p>
+        </li>
+    </ul>
+</div>
+<!--注册成功-->
+<!--<div class="czy_successful">-->
+    <!--<ul>-->
+        <!--<li>-->
+            <!--<span class="close_successful"></span>-->
+        <!--</li>-->
+        <!--<li>-->
+            <!--<div>-->
+                <!--<span></span>-->
+                <!--<div>-->
+                    <!--<p>注册成功，可以使用该账户登录彩之云APP</p>-->
+                    <!--<P>您的身份信息不完整,金融理财类服务无法正常使用,<br/>建议您扫描下载彩之云APP补全信息。</P>-->
+                <!--</div>-->
+            <!--</div>-->
+            <!--<p>账户名:<span class="czy_username"></span></p>-->
+            <!--<div></div>-->
+            <!--<div class="come_onczy">-->
+                <!--<button type="button">进入我的彩之云</button>-->
+            <!--</div>-->
+        <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--<div class="arrow"></div>-->
+<!--全屏滑动-->
+    <div class="swiper-container canver">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide slide1">
+            <div class="Slogan">
+                 <img src="czy_home/img/font.png" alt="">
+            </div>
+            <ul class="register">
+                <li class="czy_entry">
+                    <button type="button">登录</button>
+                </li>
+                <li class="home_page">
+                    <button type="button">注册</button>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- 新增备案号 -->
+        <div style="width:100%;height:100px;background-color:rgba(0,0,0,.7);position:fixed;bottom:0;left:0;text-align:center;color:#fff">
+            <ul class="new_case">
+                <li>深圳市彩之云网络科技有限公司</li>
+                <li>网站备案号：<a target="_blank" href="http://www.miitbeian.gov.cn" style="color:#fff;">粤ICP备13038151号-2</a> &nbsp;&nbsp;&nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;&nbsp;经营许可证号：粤B2-20130390</li>
+            </ul>
+        </div>
+        <!--<div class="swiper-slide slide2">-->
+            <!--<ul class="upper">-->
+            <!--</ul>-->
+            <!--<ul class="middle">-->
+                <!--<li>-->
+                <!--</li>-->
+                <!--<li>-->
+                    <!---->
+                <!--</li>-->
+            <!--</ul>-->
+            <!--<div class="lower">-->
+                <!--<ul>-->
+                    <!--<li>-->
+                        <!--<div>-->
+                            <!--<img src="czy_home/img/bottom_01.png" alt="">-->
+                        <!--</div>-->
+                        <!--<div>-->
+                            <!--<p>冲抵物业费</p>-->
+                            <!--<p>物业费？还有的转！</p>-->
+                        <!--</div>-->
+                    <!--</li>-->
+                    <!--<li>-->
+                        <!--<div>-->
+                            <!--<img src="czy_home/img/bottom_02.png" alt="">-->
+                        <!--</div>-->
+                        <!--<div>-->
+                            <!--<p>冲抵停车费</p>-->
+                            <!--<p>停车？坐等收钱！</p>-->
+                        <!--</div>-->
+                    <!--</li>-->
+                    <!--<li>-->
+                        <!--<div>-->
+                            <!--<img src="czy_home/img/bottom_03.png" alt="">-->
+                        <!--</div>-->
+                        <!--<div>-->
+                            <!--<p>增值计划</p>-->
+                            <!--<p>赚钱，从未如此容易！</p>-->
+                        <!--</div>-->
+                    <!--</li>-->
+                <!--</ul>-->
+            <!--</div>-->
+        <!--</div>-->
+        <!--<div class="swiper-slide slide3">-->
+            <!--<ul class="upper">-->
+            <!--</ul>-->
+            <!--<ul class="Three_middle">-->
+                <!--<li></li>-->
+                <!--<li></li>-->
+            <!--</ul>-->
+            <!--<div class="Three_lower">-->
+                <!--<ul>-->
+                    <!--<li>-->
+                        <!--<div>-->
+                            <!--<img src="czy_home/img/threebottom_01.png" alt="">-->
+                        <!--</div>-->
+                        <!--<div>-->
+                            <!--<p>缴费</p>-->
+                            <!--<p>便捷缴费,轻松,自在。</p>-->
+                        <!--</div>-->
+                    <!--</li>-->
+                    <!--<li>-->
+                        <!--<div>-->
+                            <!--<img src="czy_home/img/threebottom_02.png" alt="">-->
+                        <!--</div>-->
+                        <!--<div>-->
+                            <!--<p>门禁</p>-->
+                            <!--<p>扫描二维码,开启门禁,安全保障。</p>-->
+                        <!--</div>-->
+                    <!--</li>-->
+                    <!--<li>-->
+                        <!--<div>-->
+                            <!--<img src="czy_home/img/threebottom_03.png" alt="">-->
+                        <!--</div>-->
+                        <!--<div>-->
+                            <!--<p>赚的更多</p>-->
+                            <!--<p>定期稳定收益,躺着也能赚钱。</p>-->
+                        <!--</div>-->
+                    <!--</li>-->
+                <!--</ul>-->
+            <!--</div>-->
+        <!--</div>-->
+      </div>
+    </div>
+
+    
+    <!--<div class="pagination"></div>-->
+    <script type="text/javascript" src="czy_home/js/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="czy_home/js/idangerous.swiper.min.js"></script>
+    <script type="text/javascript" src="czy_home/js/jquery.cookie.js"></script>
+    <!-- <script type="text/javascript" src="czy_home/js/china_area.js"></script> -->
+    <script type="text/javascript" src="czy_home/js/jquery.slideunlock.js"></script>
+    <script type="text/javascript" src="czy_home/js/jquery.mousewheel.js"></script>
+    <!--<script type="text/javascript" src="czy_home/js/pcpage.js"></script>-->
+    <script type="text/javascript" src="czy_home/js/md5.js"></script>
+    <script type="text/javascript" src="czy_home/js/index.js"></script>
+    <!--<script type="text/javascript" src="czy_home/js/home_oauth.js"></script>-->
+    <script>
+    function onlyNum(){
+             if(!(event.keyCode==46)&&!(event.keyCode==8)&&!(event.keyCode==37)&&!(event.keyCode==39))
+             if(!((event.keyCode>=48&&event.keyCode<=57)||(event.keyCode>=96&&event.keyCode<=105)))
+             alert(9);
+             event.returnValue=false; //执行至该语句时，阻止输入；可类比阻止冒泡原理或者禁止右键功能；
+     }
+    </script>
+</body>
+</html>

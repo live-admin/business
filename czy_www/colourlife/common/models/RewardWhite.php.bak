@@ -1,0 +1,372 @@
+<?php
+
+/**
+ * This is the model class for table "reward_white".
+ *
+ * The followings are the available columns in table 'reward_white':
+ * @property integer $id
+ * @property integer $product_type
+ * @property string $job_name
+ * @property integer $job_is_special
+ * @property integer $create_time
+ * @property integer $update_employee_time 
+ * @property string $update_employee_id
+ * @property integer $state
+ * @property integer $is_deleted
+ * @property integer $reward_param
+ * @property integer $allot_param
+ * @property string $remark
+
+ */
+class RewardWhite extends CActiveRecord
+{
+    /**
+     * @var string 模型名
+     */
+    public $modelName = '订单白名单';
+    
+    private static $status_list = array(
+    	'0' => '初始状态',
+        '1' => '生成订单数据成功',
+        '2' => '生成订单数据失败',
+    	'4' => '订单数据已经存在',
+    	'8' => '倒数程序还没超过',
+    );
+
+    /**
+     * Returns the static model of the specified AR class.
+     * @param string $className active record class name.
+     * @return Employee the static model class
+     */
+    public static function model($className = __CLASS__)
+    {
+        return parent::model($className);
+    }
+
+    /**
+     * @return string the associated database table name
+     */
+    public function tableName()
+    {
+        return 'reward_white';
+    }
+
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules()
+    {
+        // NOTE: you should only define rules for those attributes that
+        // will receive user inputs.
+        
+        return array(
+					array('rela_sn', 'required'),
+					array('customer_id, status, is_deleted, create_time', 'numerical', 'integerOnly'=>true),
+					array('reward_rate, allot_zb', 'numerical', 'integerOnly'=>false),
+					array('rela_sn', 'length', 'max'=>32),
+					array('customer_mobile', 'length', 'max'=>15),
+					array('type, customer_name', 'length', 'max'=>100),
+					array('remark', 'length', 'max'=>255),
+					// The following rule is used by search().
+					// @todo Please remove those attributes that should not be searched.
+					array('id, type, rela_sn, customer_id, customer_name, customer_mobile, create_time, status, is_deleted，reward_rate，allot_zb，remark', 'safe', 'on'=>'search'),
+			);
+    }
+
+    /**
+     * @return array relational rules.
+     */
+    public function relations()
+    {
+        // NOTE: you may need to adjust the relation name and the related
+        // class name for the relations automatically generated below.
+        return array(
+        );
+        ///"id" => array(self::HAS_MANY, 'FundProjectEvolution', 'fund_project_id'),
+    }
+    
+	/**
+     * @return array
+     */
+    public function behaviors()
+    {
+        return array(
+            'CTimestampBehavior' => array(
+                'class' => 'zii.behaviors.CTimestampBehavior',
+                'updateAttribute' => null,
+            ),
+            'IsDeletedBehavior' => array(
+                'class' => 'common.components.behaviors.IsDeletedBehavior',
+            ),
+            'StateBehavior' => array(
+                'class' => 'common.components.behaviors.StateBehavior',
+            ),
+        );
+    }
+
+    /**
+     * @return array customized attribute labels (name=>label)
+     */
+    public function attributeLabels()
+    {
+        return array(
+            'id' => 'ID',
+            'rela_sn' => '对应表单号',
+			'type' => '理财产品',
+            'customer_mobile' => '用户手机',
+            'customer_id' => '用户ID',
+            'customer_name' => '用户姓名',
+           
+            'create_time' => '创建时间',
+            'status' => '状态',
+            'reward_rate' => '订单奖励系数',
+            'allot_zb' => '总部分配系数',
+            'remark' => '说明',
+        );
+    }
+ 
+
+    /**
+     * Retrieves a list of models based on the current search/filter conditions.
+     * @return ActiveDataProvider the data provider that can return the models based on the search/filter conditions.
+     */
+    public function search()
+    {
+        // Warning: Please modify the following code to remove attributes that
+        // should not be searched.
+
+        $criteria = new CDbCriteria;
+        
+        $criteria->addCondition(" is_deleted=0");
+
+        $criteria->compare('type', $this->type);
+
+        $criteria->compare('customer_mobile', $this->customer_mobile, true);
+        $criteria->compare('rela_sn', $this->rela_sn, true);
+
+        //$criteria->compare('status', $this->status);
+
+        return new ActiveDataProvider($this, array(
+            'criteria' => $criteria,
+        ));
+    }
+
+
+    public function searchNew()
+    {
+        // Warning: Please modify the following code to remove attributes that
+        // should not be searched.
+
+        $criteria = new CDbCriteria;
+
+        $criteria->addCondition(" is_deleted=0");
+
+        $criteria->compare('type', $this->type);
+
+        $criteria->compare('customer_mobile', $this->customer_mobile, true);
+        $criteria->compare('rela_sn', $this->rela_sn, true);
+
+        //$criteria->compare('state', $this->state);
+
+        return new ActiveDataProvider($this, array(
+            'criteria' => $criteria,
+        ));
+
+    }
+    /*
+     * 记录最后访问
+     */
+    public function updateLast()
+    {
+    }
+
+    public static function getStatusShow($st = null)
+    {
+        if (null === $st) {
+            return self::$status_list;
+        } else {
+            if (isset(self::$status_list[$st])) {
+                return self::$status_list[$st];
+            }
+            return '未定义';
+        }
+    }
+    
+    public function getStatusDesc()
+    {
+		return $this->getStatusShow($this->attributes['status']);
+    }
+
+    public function judgeCanInsert()
+    {
+    	$fjr_types = array(
+	        'ParkingFees2' => 'ParkingFees',
+	    	'PropertyFees2' => 'PropertyFees',
+	    	'AdvanceFees' => 'AdvanceFees',
+	    );
+	    
+    	
+    	if (empty($this->type) || empty($this->rela_sn) || empty($this->customer_mobile))
+    	{
+    		$rtn[]=array( "ok" => 0,'state' => 0, 'message'=>'关键参数为空.');
+			return CJSON::encode($rtn);
+    		//return false;
+    	}
+    	if (empty($this->reward_rate) ||($this->reward_rate < 0.01)){
+    		$rtn[]=array( "ok" => 0,'state' => 0, 'message'=>'订单奖励系数错误.');
+			return CJSON::encode($rtn);
+    	}
+    	if ($this->allot_zb > 100){
+    		$rtn[]=array( "ok" => 0,'state' => 0, 'message'=>'总部分配系数错误.');
+			return CJSON::encode($rtn);
+    	}
+    	
+    	$criteria = new CDbCriteria;
+        
+        $criteria->addCondition(" is_deleted=0");
+        $criteria->compare('type', $this->type);
+        $criteria->compare('rela_sn', $this->rela_sn);
+
+        $mrs = RewardWhite::model()->findAll($criteria);
+        if (!empty($mrs)){
+        	if(count($mrs) > 0){
+        		$irtn = 1; //已经存在同类数据。
+        		$rtn[]=array( "ok" => 0,'state' => 1, 'message'=>'已经存在同类数据.');
+				return CJSON::encode($rtn);
+        	}
+        }
+    	$connection = Yii::app()->db;
+    	
+    	if (strnatcmp(strtoupper($this->type),'RXH')==0)  //RXH产品类型
+    	{
+    		/*
+    		 $sql ="select id,sn, rxh_sn, type, customer_id, name, mobile, amount, pay_time, repayment_date,
+        			inviter_mobile, income_rate, licai_time_month, licai_time_day, create_time 
+        			from rxh_order where type='".$this->type."' and rxh_sn='".$this->rela_sn."' 
+        			and mobile='".$this->customer_mobile."'";
+    		 */
+    		$sql ="select id, rxh_sn as rela_sn, type,customer_id, name as customer_name, pay_time  
+        			from rxh_order where type='".$this->type."' and rxh_sn='".$this->rela_sn."' 
+        			and mobile='".$this->customer_mobile."'";
+    		
+    	}else if (strnatcmp(strtoupper($this->type),strtoupper('hhn_eload'))==0){
+    		
+
+    	}else if (strnatcmp(strtoupper($this->type),strtoupper('elicai'))==0){
+    		/*
+    		 $sql = "select id, sn, e_sn, type, customer_id, name, mobile, month, amount,pay_time,
+        			inviter_id, inviter_name, inviter_mobile, revise_type, create_time, ticheng_send_status  
+        			from elicai_redpacket_ticheng where customer_id>0 and type='".$this->type."'  
+        			and e_sn='".$this->rela_sn."' and mobile='".$this->customer_mobile."'";
+        	 */
+    		
+    		$sql = "select id, e_sn as rela_sn, type, customer_id, name as customer_name, pay_time  
+        			from elicai_redpacket_ticheng where customer_id>0 and type='".$this->type."'  
+        			and e_sn='".$this->rela_sn."' and mobile='".$this->customer_mobile."'";
+    		 
+    	}else if ((strnatcmp(strtoupper($this->type),strtoupper('ParkingFees2'))==0)
+    			||(strnatcmp(strtoupper($this->type),strtoupper('PropertyFees2'))==0)
+    			||(strnatcmp(strtoupper($this->type),strtoupper('AdvanceFees'))==0)){
+    		
+    			/*
+    		$sql = "select at.id, at.sn, at.model as type, at.customer_id, bt.name, bt.mobile, at.amount, at.pay_time,
+        		    at.object_id, at.payment_id, at.bank_pay,at.red_packet_pay,at.user_red_packet,
+        			at.pay_id, at.pay_rate, at.create_time from others_fees at left join customer bt 
+        			on at.customer_id=bt.id where model='".$fjr_types[$this->type]."' and at.STATUS=99 AND bt.mobile<>'' 
+        			AND bt.is_deleted=0  AND bt.state=0 and at.sn='".$this->rela_sn."' and bt.mobile='".$this->customer_mobile."'";
+    			*/
+    		$sql = "select at.id, at.sn as rela_sn, at.model as type, at.customer_id, bt.name as customer_name, at.pay_time  
+    				from others_fees at left join customer bt on at.customer_id=bt.id  
+    				where model='".$fjr_types[$this->type]."' and at.STATUS=99 AND bt.mobile<>'' 
+        			AND bt.is_deleted=0  AND bt.state=0 and at.sn='".$this->rela_sn."' and bt.mobile='".$this->customer_mobile."'";		
+    				
+    	}else if ((strnatcmp(strtoupper($this->type),strtoupper('PropertyActivity'))==0)
+    			||(strnatcmp(strtoupper($this->type),strtoupper('PropertyFees'))==0)
+    			||(strnatcmp(strtoupper($this->type),strtoupper('ParkingFeesMonth'))==0)
+    			||(strnatcmp(strtoupper($this->type),strtoupper('ParkingFees'))==0)){
+				/*    				
+    			$sql = "select at.id, at.sn, at.model as type, at.customer_id, at.customer_name, bt.name, bt.mobile, at.amount + at.increase_amount as amount, at.pay_time,
+        			at.earnings, at.reduction, at.rate_id, at.object_id, at.community_rate, at.mitigate_starttime,
+        			at.mitigate_endtime,at.inviter_mobile, at.create_time from property_activity at left join customer bt 
+        			on at.customer_id=bt.id where at.STATUS=99 AND bt.mobile<>'' 
+        			AND bt.is_deleted=0  AND bt.state=0 and model='".$this->type."'  
+        			and at.sn='".$this->rela_sn."' and bt.mobile='".$this->customer_mobile."'";
+        		*/
+    			$sql = "select at.id, at.sn as rela_sn, at.model as type, at.customer_id, at.customer_name, at.pay_time  
+    				from property_activity at left join customer bt 
+        			on at.customer_id=bt.id where (at.STATUS=99 or at.STATUS=96 or at.STATUS=88) AND bt.mobile<>'' 
+        			AND bt.is_deleted=0  AND bt.state=0 and model='".$this->type."'  
+        			and at.sn='".$this->rela_sn."' and bt.mobile='".$this->customer_mobile."'";
+    	}else if (strnatcmp(strtoupper($this->type),strtoupper('zzhplan'))==0){
+    		
+    		$sql = "select at.id, at.sn, 'zzhplan' as type, at.customer_id, at.customer_name, at.amount, at.pay_time
+        			from appreciation_plan at left join customer bt on at.customer_id=bt.id where (model='Zengzhi')   
+        			and (at.STATUS=99 or at.STATUS=96 or at.STATUS=88) AND bt.mobile<>'' AND bt.is_deleted=0  AND bt.state=0  
+        			and at.sn='".$this->rela_sn."' and bt.mobile='".$this->customer_mobile."'";
+        			
+    	}
+    	
+    	if (empty($sql)){
+    		$rtn[]=array( "ok" => 0,'state' => 0, 'message'=>'类型参数错误.');
+			return CJSON::encode($rtn);
+    		//return false;
+    	}
+    	else{
+    		$sql = $sql." limit 3";
+    	}
+
+        $command = $connection->createCommand($sql);
+        
+        $result = $command->queryAll();
+        
+    	if (count($result) > 0) {
+    		
+    		if (count($result) > 1) {
+    			$rtn[]=array( "ok" => 0,'state' => 2, 'message'=>'存在多条数据.');
+				return CJSON::encode($rtn);
+    		}else{
+    			$m_id = $result[0]['id']; 
+		    	$m_rela_sn = $result[0]['rela_sn']; 
+		    	$m_type = $result[0]['type'];
+		    	if (empty($m_type)){
+		    		$m_type = $this->type;
+		    	}
+		    	
+		    	$pay_time = $result[0]['pay_time'];
+		    	if (intval($pay_time) < 1446998400){
+		    		$rtn[]=array( "ok" => 0,'state' => 4, 'message'=>'支付时间是11月9号前，暂不加入白名单.');
+		        	return CJSON::encode($rtn);
+		    	}
+		    	
+		    	$sSql ="select kind, sn from reward_import_cases where (kind&8)=8 and  
+		    			type='".$m_type."' and relaId =".$m_id." and sn ='".$m_rela_sn."' limit 1";
+		    	
+	    		$rs_t1= $connection->createCommand($sSql)->queryAll();
+		        
+		        if (count($rs_t1) > 0) {
+		        	$rtn[]=array( "ok" => 0,'state' => 4, 'message'=>'提成倒数系统已经处理过了此条记录.');
+		        	return CJSON::encode($rtn);
+		        }else{
+		        	$sSql ="select max(lastid) as maxid from reward_import_mark where type='".$m_type."' ";
+		        	$m_lastid = 0;
+		        	$rs_t2= $connection->createCommand($sSql)->queryAll();
+		        	if (count($rs_t2) > 0) {
+		        		$m_lastid = $rs_t2[0]['maxid']; 
+		        	}
+		        	if ($m_lastid <=$m_id){
+		        		$rtn[]=array( "ok" => 0,'state' => 8, 'message'=>'提成倒数系统还没越过此记录,请让倒数系统先处理.');
+		        		return CJSON::encode($rtn);
+		        	}else{
+		        		$rtn[]=array( "ok" => 1,'state' => 1,'customer_name'=>$result[0]['customer_name'],'customer_id'=>$result[0]['customer_id'],'message'=>'可添加'.$result[0]['customer_name'].'的'.$result[0]['rela_sn'].'订单');
+		        		return CJSON::encode($rtn);
+		        	}
+		        }
+    		}
+        }
+        
+        $rtn[]=array( "ok" => 0,'state' => 5, 'message'=>'没有找到数据.');
+		return CJSON::encode($rtn);
+    }
+
+}
+

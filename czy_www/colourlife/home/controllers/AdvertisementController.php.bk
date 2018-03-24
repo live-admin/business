@@ -1,0 +1,80 @@
+<?php
+
+
+class AdvertisementController extends Controller{
+
+    private $_userId=0;
+
+
+
+    /**
+     * 验证登录
+     */
+    private function checkLogin()
+    {
+        if (empty($_REQUEST['cust_id']) && empty($_SESSION['cust_id'])) {
+            exit('<h1>用户信息错误，请重新登录</h1>');
+        } else {
+            $custId = 0;
+
+            if (isset($_REQUEST['cust_id'])) {  //优先有参数的
+                $custId = intval($_REQUEST['cust_id']);
+                $_SESSION['cust_id'] = $custId;
+            } else if (isset($_SESSION['cust_id'])) {  //没有参数，从session中判断
+                $custId = $_SESSION['cust_id'];
+            }
+            $custId=intval($custId);
+            $customer = Customer::model()->find("id=:id and state = 0", array('id' => $custId));
+            if (empty($custId) || empty($customer)) {
+                exit('<h1>用户信息错误，请重新登录</h1>');
+            }
+            $this->_userId = $custId;
+//			$this->_username = $customer->username;
+//			//点赞才使用
+//			if (empty($this->_isAnnounce)){
+//				$result=ThanksGivingResult::model()->find("customer_id=:cust_id and day =:day", array(':cust_id' => $custId,':day'=>date("Ymd")));
+//				if ($result) {
+//					$this->_luckyTodayCan = 1;
+//				}
+//			}
+        }
+    }
+
+    /*
+     * E缴费
+     */
+    public function actionEasyPay(){
+        $this->renderPartial('easyPay');
+    }
+
+    /*
+     * 彩富人生
+     */
+    public function actionWealthLife(){
+        $this->renderPartial('wealthLife');
+    }
+
+    /*
+     * E投诉
+     */
+    public function actionEasyComplain(){
+        $this->checkLogin();
+        $model = SetableSmallLoans::model();
+        $url = $model->searchByIdAndType('tousubaoxiu', '', $this->_userId,false);
+        $this->renderPartial('easyComplain',array('url'=>$url->completeURL));
+    }
+
+    /*
+     * E停车
+     */
+    public function actionEasyParking(){
+        $this->renderPartial('easyParking');
+    }
+
+    /*
+     * 金猴送礼
+     */
+    public function actionMonkey(){
+        $this->renderPartial('monkey');
+    }
+}

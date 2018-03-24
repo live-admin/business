@@ -1,0 +1,2 @@
+colourlife_czy_www_service:
+  build: .

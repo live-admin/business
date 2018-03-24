@@ -1,0 +1,588 @@
+<?php
+
+/**
+ * This is the model class for table "cai_redpacket_carry".
+ *
+ * The followings are the available columns in table 'cai_redpacket_carry':
+ * @property integer $id
+ * @property integer $employee_id
+ * @property integer $receiver_id
+ * @property integer $type
+ * @property string $amount
+ * @property integer $is_received
+ * @property integer $state
+ * @property integer $is_deleted
+ * @property integer $create_time
+ * @property string $note
+ */
+class CaiRedpacketCarry extends CActiveRecord
+{	
+	public $modelName = '彩管家红包转账';
+    public $employeeName;
+    public $employeeOA;
+    public $employeeMobile;
+    public $startTime;
+    public $endTime;
+    public $receiverName;
+    public $receiverUserName;
+    public $receiverMobile;
+	/**
+	 * @return string the associated database table name
+	 */
+	public function tableName()
+	{
+		return 'cai_redpacket_carry';
+	}
+
+    static $carryType = array(//0=>OA转账 1=>转账彩之于云
+        0=>"转账到OA",
+        1=>"转账到彩之云",
+    );
+
+    static $carryReceiver = array(//0=>未收到 1=>已到账
+        0=>"未收到",
+        1=>"已到账",
+    );
+
+	/**
+	 * @return array validation rules for model attributes.
+	 */
+	public function rules()
+	{
+		// NOTE: you should only define rules for those attributes that
+		// will receive user inputs.
+		return array(
+			array('sn, employee_id, receiver_id, amount', 'required'),
+            array('employee_id, receiver_id, type, is_received, state, is_deleted, create_time', 'numerical', 'integerOnly'=>true),
+            array('amount', 'length', 'max'=>10),
+            array('note', 'safe'),
+            array('sn', 'length', 'max'=>32),
+            array('type', 'in', 'range'=>array(0,1)),
+            // The following rule is used by search().
+            // @todo Please remove those attributes that should not be searched.
+            array('id, sn, employee_id, receiver_id, type, amount, is_received, state, is_deleted, create_time, note, employeeName, employeeOA, employeeMobile, startTime, endTime, receiverName, receiverUserName, receiverMobile', 'safe', 'on'=>'search'),
+            array('id, sn, employee_id, receiver_id, type, amount, is_received, state, is_deleted, create_time, note, employeeName, employeeOA, employeeMobile, startTime, endTime, receiverName, receiverUserName, receiverMobile', 'safe', 'on'=>'report_search'),
+        );
+	}
+
+    
+
+	/**
+	 * @return array relational rules.
+	 */
+	public function relations()
+	{
+		// NOTE: you may need to adjust the relation name and the related
+		// class name for the relations automatically generated below.
+		return array(
+            'employee' => array(self::BELONGS_TO, 'Employee', 'employee_id'),
+            'receiver' => array(self::BELONGS_TO, 'Employee', 'receiver_id'),
+            'customer' => array(self::BELONGS_TO, 'Customer', 'receiver_id'),
+            
+        );
+	}
+
+	/**
+	 * @return array customized attribute labels (name=>label)
+	 */
+	public function attributeLabels()
+	{
+		return array(
+			'id' => 'ID',
+			'sn' => 'SN号',
+			'employee_id' => '转账人ID',
+			'receiver_id' => '接受人ID',
+			'type' => '类型',
+			'amount' => '转账金额',
+			'is_received' => '接收',
+			'state' => '状态',
+			'is_deleted' => '删除',
+			'create_time' => '创建时间',
+			'note' => '备注',
+            'employeeName' => '转账人',
+            'employeeOA' => '转账人OA',
+            'employeeMobile' => '转账人手机',
+            'startTime' => '开始时间',
+            'endTime' => '结束时间',
+            'receiverName'=>'接收人',
+            'receiverUserName'=>'接收人账号',
+            'receiverMobile'=>'接收人手机',
+		);
+	}
+
+
+	/**
+     * @return array
+     */
+    public function behaviors()
+    {
+        return array(
+        	'CTimestampBehavior' => array(
+                'class' => 'zii.behaviors.CTimestampBehavior',
+                'createAttribute' => 'create_time',
+                'updateAttribute' => null,
+                'setUpdateOnCreate' => false,
+            ),
+            'IsDeletedBehavior' => array(
+                'class' => 'common.components.behaviors.IsDeletedBehavior',
+            ),
+            'StateBehavior' => array(
+                'class' => 'common.components.behaviors.StateBehavior',
+            ),
+        );
+    }
+	/**
+	 * Retrieves a list of models based on the current search/filter conditions.
+	 *
+	 * Typical usecase:
+	 * - Initialize the model fields with values from filter form.
+	 * - Execute this method to get CActiveDataProvider instance which will filter
+	 * models according to data in model fields.
+	 * - Pass data provider to CGridView, CListView or any similar widget.
+	 *
+	 * @return CActiveDataProvider the data provider that can return the models
+	 * based on the search/filter conditions.
+	 */
+	public function search()
+    {
+        // @todo Please modify the following code to remove attributes that should not be searched.
+
+        $criteria=new CDbCriteria;
+
+        $criteria->compare('`t`.id',$this->id);
+        $criteria->compare('`t`.sn',$this->sn,true);
+        $criteria->compare('`t`.employee_id',$this->employee_id);
+        $criteria->compare('`t`.receiver_id',$this->receiver_id);
+        $criteria->compare('`t`.type',$this->type);
+        $criteria->compare('`t`.amount',$this->amount,true);
+        $criteria->compare('`t`.is_received',$this->is_received);
+        $criteria->compare('`t`.state',$this->state);
+        $criteria->compare('`t`.is_deleted',$this->is_deleted);
+        // $criteria->compare('`t`.create_time',$this->create_time);
+        $criteria->compare('`t`.note',$this->note,true);
+        if ($this->startTime!='') {
+            $criteria->compare("`t`.create_time", ">= ".strtotime($this->startTime." 00:00:00"));
+        }
+        if ($this->endTime!='') {
+            $criteria->compare("`t`.create_time", "<= ".strtotime($this->endTime." 23:59:59"));
+        }
+//        $criteria->with[] = 'employee';
+//        if ($this->employeeName!= '') {
+//            $criteria->compare("employee.name", $this->employeeName);
+//        }
+//
+//        if ($this->employeeMobile!= '') {
+//            $criteria->compare("employee.mobile", $this->employeeMobile);
+//        }
+//
+//        if ($this->employeeOA!= '') {
+//            $criteria->compare("employee.username", $this->employeeOA);
+//        }
+
+
+//      ICE 上面三个搜索就是为了让查询更准确，而不是用表里面的什么，所以按照以下接入ice
+		$employee_ids = array();
+		if ($this->employeeName != '') {
+			$employees = ICEEmployee::model()->ICEGetAccountSearch(array('keyword' => $this->employeeName));
+			if (!empty($employees)) {
+				foreach ($employees as $employee) {
+					$employee_ids[] = $employee['czyId'];
+				}
+			}
+		}
+		if ($this->employeeMobile != '') {
+			$employees = ICEEmployee::model()->ICEGetAccountSearch(array('keyword' => $this->employeeMobile));
+			if (!empty($employees)) {
+				foreach ($employees as $employee) {
+					$employee_ids[] = $employee['czyId'];
+				}
+			}
+		}
+		if ($this->employeeOA != '') {
+			$employees = ICEEmployee::model()->ICEGetAccountSearch(array('keyword' => $this->employeeOA));
+			if (!empty($employees)) {
+				foreach ($employees as $employee) {
+					$employee_ids[] = $employee['czyId'];
+				}
+			}
+		}
+		if (!empty($employee_ids)) {
+			$criteria->addInCondition('t.employee_id', array_unique($employee_ids));
+		}
+
+
+
+        // $criteria->order = "`t`.create_time DESC ";
+        return new CActiveDataProvider($this, array(
+            'criteria'=>$criteria,
+        ));
+    }
+
+
+
+
+    public function report_search()
+    {
+        // @todo Please modify the following code to remove attributes that should not be searched.
+
+        $criteria=new CDbCriteria;
+        if (isset($_GET['CaiRedpacketCarry']) && !empty($_GET['CaiRedpacketCarry'])) {
+            $_SESSION['CaiRedpacketCarry'] = array();
+            $_SESSION['CaiRedpacketCarry'] = $_GET['CaiRedpacketCarry'];
+        }
+        if (isset($_GET['exportAction']) && $_GET['exportAction'] == 'exportReport') {
+            if (isset($_SESSION['CaiRedpacketCarry']) && !empty($_SESSION['CaiRedpacketCarry'])) {
+                foreach ($_SESSION['CaiRedpacketCarry'] as $key => $val) {
+                    if ($val != "") {
+                        $this->$key = $val;
+                    }
+                }
+            }
+        }
+        $criteria->compare('`t`.id',$this->id);
+        $criteria->compare('`t`.sn',$this->sn,true);
+        $criteria->compare('`t`.employee_id',$this->employee_id);
+        $criteria->compare('`t`.receiver_id',$this->receiver_id);
+        $criteria->compare('`t`.type',$this->type);
+        $criteria->compare('`t`.amount',$this->amount,true);
+        $criteria->compare('`t`.is_received',$this->is_received);
+        $criteria->compare('`t`.state',$this->state);
+        $criteria->compare('`t`.is_deleted',$this->is_deleted);
+        $criteria->compare('`t`.create_time',$this->create_time);
+        $criteria->compare('`t`.note',$this->note,true);
+        if ($this->startTime!='') {
+            $criteria->compare("`t`.create_time", ">= ".strtotime($this->startTime." 00:00:00"));
+        }
+        if ($this->endTime!='') {
+            $criteria->compare("`t`.create_time", "<= ".strtotime($this->endTime." 23:59:59"));
+        }
+        return new CActiveDataProvider($this, array(
+            'criteria'=>$criteria,
+        ));
+    }
+
+
+     public function getEmployeeName()
+    {
+        // return empty($this->employee)?'':$this->employee->name;
+//      ICE接入
+        if(!empty($this->employee_id)){
+            $employee = ICEEmployee::model()->findbypk($this->employee_id);
+            if(!empty($employee['name'])){
+                return $employee['name'];
+            }
+
+        }
+
+        return '';
+    }
+
+
+    public function getEmployeeOA()
+    {
+        // return empty($this->employee)?'':$this->employee->username;
+//      ICE接入
+        if(!empty($this->employee_id)){
+            $employee = ICEEmployee::model()->findbypk($this->employee_id);
+            if(!empty($employee['username'])){
+                return $employee['username'];
+            }
+
+        }
+
+        return '';
+    }
+
+
+    public function getEmployeeMobile()
+    {
+        // return empty($this->employee)?'':$this->employee->mobile;
+//      ICE接入
+        if(!empty($this->employee_id)){
+            $employee = ICEEmployee::model()->findbypk($this->employee_id);
+            if(!empty($employee->mobile)){
+                return $employee->mobile;
+            }
+
+        }
+
+        return '';
+    }
+
+
+
+    public function getReceiverName()
+    {   
+//        return ($this->type==0)?(empty($this->receiver)?'':$this->receiver->name):(empty($this->customer)?'':$this->customer->name);
+//	    ICE
+	    if ($this->type == 0) {
+		    if (!empty($this->receiver_id)) {
+			    $employee = ICEEmployee::model()->findbypk($this->receiver_id);
+			    if (!empty($employee['name'])) {
+				    return $employee['name'];
+			    }
+		    }
+		    return '';
+	    } else {
+		    return (empty($this->customer) ? '' : $this->customer->name);
+	    }
+    }
+
+
+    public function getReceiverUserName()
+    {
+//        return ($this->type==0)?(empty($this->receiver)?'':$this->receiver->username):(empty($this->customer)?'':$this->customer->username);
+//	    ICE
+	    if ($this->type == 0) {
+		    if (!empty($this->receiver_id)) {
+			    $employee = ICEEmployee::model()->findbypk($this->receiver_id);
+			    if (!empty($employee['username'])) {
+				    return $employee['username'];
+			    }
+		    }
+		    return '';
+	    } else {
+		    return (empty($this->customer) ? '' : $this->customer->username);
+	    }
+    }
+
+
+    public function getReceiverMobile()
+    {
+//        return ($this->type==0)?(empty($this->receiver)?'':$this->receiver->mobile):(empty($this->customer)?'':$this->customer->mobile);
+	    if ($this->type == 0) {
+		    if (!empty($this->receiver_id)) {
+			    $employee = ICEEmployee::model()->findbypk($this->receiver_id);
+			    if (!empty($employee['mobile'])) {
+				    return $employee['mobile'];
+			    }
+		    }
+		    return '';
+	    } else {
+		    return (empty($this->customer) ? '' : $this->customer->mobile);
+	    }
+    }
+
+
+
+
+    public function getTypeName($html = false)
+    {
+        $return = '';
+        $return .= ($html) ? '<span class="label label-success">' : '';
+        $return .= self::$carryType[$this->type];
+        $return .= ($html) ? '</span>' : '';
+        return $return;
+    }
+
+    public function getReceiverStatusName($html = false)
+    {   
+        $return = '';
+        $return .= ($html) ? '<span class="label label-success">' : '';
+        $return .= self::$carryReceiver[$this->is_received];
+        $return .= ($html) ? '</span>' : '';
+        return $return;
+    }
+
+
+    public function getCreateTime()
+    {
+        return date("Y-m-d H:i:s", $this->create_time);
+    }
+
+
+    public function getTypeList(){
+        $list = array();
+        $list = self::$carryType;
+        return array_merge(array(''=>'全部'), $list);
+        
+    }
+
+
+    public function getReceiverList(){
+        $list = array();
+        $list = self::$carryReceiver;
+        return array_merge(array(''=>'全部'), $list);
+        
+    }
+
+
+    /**
+     * 创建转账订单
+     * 参数说明：
+     * @feeAttr:CaiRedpacketCarry模型的属性集合
+     * 返回值 boolean, true:创建成功，false:创建失败
+     * */
+    public static function createRedPacketCarryOrder($feeAttr)
+    {
+        //判断参数
+        if (empty($feeAttr)) {
+            CaiRedpacketCarry::model()->addError('id', "红包转账失败！");
+            return false;
+        }
+
+        //创建我们的订单记录及记录
+        $other = new CaiRedpacketCarry();
+        $other->attributes = $feeAttr;
+        if(in_array($feeAttr["type"],array(0,1))){
+        	if($feeAttr["type"]==0){//转账到OA
+
+                //消费红包
+                $items_to = array(
+                    'employee_id' => $feeAttr["employee_id"],//员工ID
+                    'to_type' => Item::CAI_RED_PACKET_TO_TYPE_CARRY,//给同事发红包
+                    'sum' => $feeAttr["amount"],//红包金额,
+                    'sn' => $feeAttr["sn"],
+                );
+
+
+                //获得红包
+        		$redPacked_from = new CaiRedPacket();
+        		$items_from = array(
+	                'employee_id' => $feeAttr["receiver_id"],//员工ID
+	                'from_type' => Item::CAI_RED_PACKET_FROM_TYPE_CARRY_EMPLOYEE,//获得同事红包
+	                'sum' =>$feeAttr["amount"],//红包金额,
+	                'sn' => $feeAttr["sn"],
+        		);
+        	}else if($feeAttr["type"]==1){//转账到彩之云
+
+                //消费红包
+                $items_to = array(
+                    'employee_id' => $feeAttr["employee_id"],//员工ID
+                    'to_type' => Item::CAI_RED_PACKET_TO_TYPE_COLOURLIFE,//OA转账消费红包(转彩之云)
+                    'sum' => $feeAttr["amount"],//红包金额,
+                    'sn' => $feeAttr["sn"],
+                );
+
+                //获得红包
+        		$redPacked_from = new RedPacket();
+        		$items_from = array(
+	                'customer_id' => $feeAttr["receiver_id"],//用户的ID(customer)
+	                'from_type' => Item::RED_PACKET_FROM_TYPE_OA_CARRY,//OA转账获得红包
+	                'sum' => $feeAttr["amount"],//红包金额,
+	                'sn' => $feeAttr["sn"],
+        		);
+        	}else{
+        		return false;
+        	}
+        }else{
+        	return false;
+        }
+        
+        $transaction = Yii::app ()->db->beginTransaction();
+        $redPacked_to = new CaiRedPacket();
+        //把对应的邀请记录设置成已发送红包
+        try{
+        	if(!$other->validate()||!$other->save()){
+	        	CaiRedpacketCarry::model()->addError('id', "红包转账失败！");
+	        	return false;
+        	}
+            // 发起交易
+            $ftransaction = self::transaction($items_to, $items_from, $feeAttr['note']);
+            if(!$ftransaction || !isset($ftransaction['payinfo']) || !isset($ftransaction['payinfo']['tno'])){
+                throw new Exception('饭票转账失败！');
+                return false;
+            }
+
+        	$ret_to=$redPacked_to->consumeRedPacker($items_to);
+            $ret_from=$redPacked_from->addRedPacker($items_from);
+        	if(!$ret_to){
+
+            	Yii::log("红包转账失败,参数列表".json_encode($items_to).">>>>".json_encode($items_from),CLogger::LEVEL_ERROR,'colourlife.core.caiRedpacketCarry.redPacketCarryOrder');
+            	@$other->delete();
+            	$transaction->rollback();
+            	return false;
+
+            }
+
+        	if(!$ret_from){
+            	Yii::log("红包转账失败,参数列表".json_encode($items_to).">>>>".json_encode($items_from),CLogger::LEVEL_ERROR,'colourlife.core.caiRedpacketCarry.redPacketCarryOrder');
+            	@$other->delete();
+            	$transaction->rollback();
+            	return false;
+        	}
+
+    		$updateSql = "update cai_redpacket_carry set is_received = 1 where id=".$other->id;
+            $result = Yii::app()->db->createCommand($updateSql)->execute();
+            if($result){
+            	Yii::log("红包转账成功,记录ID'{$other->id}',参数列表".json_encode($items_to).">>>>".json_encode($items_from),CLogger::LEVEL_INFO,'colourlife.core.caiRedpacketCarry.redPacketCarryOrder');
+            	$transaction->commit();
+
+				//TODO:kakatool 插入金融平台交易同步方法
+				//转账,包括员工转账给员工,和员工转账给用户
+				if($feeAttr["type"]==0){
+					FinanceSyncService::getInstance()->employeeTransfer($items_to['employee_id'],$items_from['employee_id'],$feeAttr["amount"]);
+				}
+				elseif ($feeAttr["type"]==1){
+					FinanceSyncService::getInstance()->employeeTransferToCustomer($items_to['employee_id'],$items_from['customer_id'],$feeAttr["amount"]);
+				}
+
+    			return true;
+            }else{
+            	Yii::log("红包转账失败,参数列表".json_encode($items_to).">>>>".json_encode($items_from),CLogger::LEVEL_ERROR,'colourlife.core.caiRedpacketCarry.redPacketCarryOrder');
+            	@$other->delete();
+            	$transaction->rollback();
+            	return false;
+            }
+        }catch(Exception $e) {
+            Yii::log("try异常：".json_encode($e->getMessage()),CLogger::LEVEL_ERROR,'colourlife.core.caiRedpacketCarry.redPacketCarryOrder');
+            //@$other->delete();
+            $transaction->rollback();   // 在异常处理中回滚
+            return false;
+        }
+
+     }
+
+    /**
+     * 请求金融平台交易接口
+     * @param array $attr
+     * @return  array
+     */
+    private static function transaction($items_to, $items_from, $note){
+        $orgAccount = null;
+        $destAccount = null;
+
+        $orgatid = FinanceMicroService::getInstance()->getEmployeePano()['atid'];
+        if(isset($items_to['to_type']) && $items_to['to_type'] == Item::CAI_RED_PACKET_TO_TYPE_COLOURLIFE){
+            // 转账到彩之云
+            $destatid = FinanceMicroService::getInstance()->getCustomerPano()['atid'];
+            $destAccount = FinanceCustomerRelateModel::model()->find('customer_id=:customer_id',array(':customer_id'=>$items_from['customer_id']));
+        } else {
+            // OA内部转账
+            $destatid = $orgatid;
+            $destAccount = FinanceEmployeeRelateModel::model()->find('employee_id=:employee_id',array(':employee_id'=>$items_from['employee_id']));
+        }
+        // 彩之云全国饭票
+        $orgAccount = FinanceEmployeeRelateModel::model()->find('employee_id=:employee_id',array(':employee_id'=>$items_to['employee_id']));
+        if(!$orgAccount || !$destAccount){
+            return false;
+        }
+
+
+        //执行交易操作
+        return FinanceMicroService::getInstance()->fastTransaction(
+            $items_to['sum'],           //交易金额
+            $note,                     //备注
+            $orgatid,    //支付类型
+            $orgAccount['cano'],     //支付账号
+            $destatid,   //收款类型
+            $destAccount['cano'],    //收款账号
+            $note,                   //备注
+            '',                     //回调方法，快速交易不需要设置
+            $items_to['sn']             //本地交易编号
+        );
+
+    }
+
+
+	/**
+	 * Returns the static model of the specified AR class.
+	 * Please note that you should have this exact method in all your CActiveRecord descendants!
+	 * @param string $className active record class name.
+	 * @return CaiRedpacketCarry the static model class
+	 */
+	public static function model($className=__CLASS__)
+	{
+		return parent::model($className);
+	}
+}

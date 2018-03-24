@@ -1,0 +1,11 @@
+colourlife_czy_www_service:
+  image: "${image_name}"
+  volumes:
+    - "/etc/localtime:/etc/localtime:ro"
+    - "/data/docker/logs/nginx:/var/log/nginx"
+    - "/data/docker/logs/colourlife_czy_www_service/colourlife/log/:/var/www/html/colourlife/log/"
+    - "/data/docker/logs/colourlife_czy_www_service/log/:/var/www/html/log/"
+  ports:
+    - "8080:8080"
+  restart: always
+

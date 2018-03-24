@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>演出剧</title>
+    <link rel="stylesheet" href="css/colour.css"/>
+    <style>
+        body{
+            background:#f2f3f4;
+        }
+        .colour_bg{
+            width:100%;
+            height:auto;
+            position:relative;
+        }
+        .colour_bg .bg_img{
+            width:100%;
+        }
+        .img_topHeader{
+            position: absolute;
+            top:0;
+            width:100%;
+        }
+        .header{
+            width:60%;
+            margin:0 auto;
+            overflow: hidden;
+        }
+        .header_right{
+            height:44px;
+            width:100%;
+            float: right;
+            color:#fff;
+        }
+        .header_right>li{
+            float:right;
+            padding:0 1%;
+            line-height:14px;
+            height:14px;
+            margin-top:20px;
+            font-size:0.9em;
+            cursor:pointer;
+        }
+        .header_right li a{
+            color:#fff;
+        }
+        .header_left{
+            width:100%;
+            height:60px;
+            float: left;
+        }
+        .logo{
+            width:16%;
+            display:flex;
+            align-items:center
+        }
+        .logo img{
+            width:100%;
+        }
+        .header_left>li{
+            height:60px;
+            float: left;
+        }
+        .header_list{
+            height:60px;
+            width:100%;
+        }
+        .header_list>li{
+            float:right;
+            color:#fff;
+            height:60px;
+            line-height:60px;
+            margin:0 3%;
+        }
+        .header_list a{
+            color:#fff;
+            font-size:1rem;
+        }
+        .header_list a:hover{
+            color:#27a2f0;
+        }
+        /*中间内容*/
+        .content{
+            width:100%;
+            height:auto;
+            margin:80px 0 70px 0;
+        }
+        .content_box{
+            width:60%;
+            height:auto;
+            margin:0 auto;
+        }
+        /*演出剧*/
+        .content_Performance{
+            width:100%;
+            height:auto;
+        }
+        /*详情*/
+        .details{
+            width:100%;
+            height:auto;
+            overflow: hidden;
+        }
+        .details li{
+            width:32%;
+            height:auto;
+            /*border:1px solid #ccc;*/
+            float: left;
+            background:#fff;
+        }
+        .details img{
+            width:100%;
+        }
+        .details .font_box{
+            padding:0 5%;
+        }
+        .details .details_title{
+            font-size:1.1em;
+            margin-top:20px;
+            margin-bottom:0;
+            font-weight:550;
+            color:#4f555d;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .details .details_con{
+            overflow: hidden;
+            text-overflow:ellipsis;
+            white-space: nowrap;
+            color:#c0c7cb;
+            font-size:1em;
+            margin:15px 0;
+        }
+        .details_two{
+            margin:0 2%;
+        }
+        /*底部*/
+        .bottom{
+            width:100%;
+            height:90px;
+            background:#37434b;
+        }
+        .bottom_box{
+            width:60%;
+            margin:0 auto;
+            line-height:90px;
+            text-align: center;
+            font-size:0.8em;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<!--头部-->
+<div class="colour_bg">
+    <img class="bg_img" src="images/banner_play.png" alt=""/>
+    <div class="img_topHeader">
+        <div class="header">
+            <ul class="header_right">
+                <li class="app_Customer"><a href="javascript:void(0)">联系客服</a></li>
+                <li id="orderInfo" style="border-left:1px solid #fff;border-right:1px solid #fff;"><a href="./../order.html">我的订单</a></li>
+                <li id="userInfo">你好，<span class="twoczy_username"></span>&nbsp;&nbsp;<span class="Sign_out">退出</span>&nbsp;</li>
+            </ul>
+            <ul class="header_left">
+                <li class="logo">
+                    <img src="images/czy_logos.png" alt="">
+                </li>
+                <li style="float: right;width:84%">
+                    <ul class="header_list">
+                        <li style="margin-right:0" class="search">
+                            <img src="images/sous.png" alt="">
+                        </li>
+                        <li><a href="colour_sports.html">彩.竞技</a></li>
+                        <li><a href="colour_live.html">彩.直播</a></li>
+                        <li><a href="colour_comic.html">动.漫</a></li>
+                        <li><a href="colour_activities.html">社区活动</a></li>
+                        <li><a href="javascript:;" style="color:#27a2f0;">演出剧</a></li>
+                        <li><a href="colour_community.html">彩.社区</a></li>
+                        <li><a href="./../../index.html">首页</a></li>
+                    </ul>
+                    <ul class="sou_banner">
+                        <li></li>
+                        <li>
+                            <input type="text" value="请输入搜索内容" onfocus="this.value='';">
+                        </li>
+                        <li></li>
+                    </ul>
+                </li>
+                <li></li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+<!--中间内容-->
+<div class="content">
+    <div class="content_box">
+        <!-- 演出剧-->
+        <div class="content_Performance">
+            <ul class="details">
+                <li>
+                    <a href="https://piao.damai.cn/121289.html">
+                        <div>
+                            <img src="images/colour_yc01.png" alt=""/>
+                        </div>
+                        <div class="font_box">
+                            <p class="details_title">希特勒的肚子</p>
+                            <p class="details_con">《希特勒的肚子》由《两只狗的生活意见》原班人马担纲的喜剧作品，他们将以戏谑笑骂的方式将观众带回到二战时期的柏林，见证一段荒诞、严肃且悲伤的历史。</p>
+                        </div>
+                    </a>
+                </li>
+                <li class="details_two">
+                    <a href="https://piao.damai.cn/126214.html">
+                        <div>
+                            <img src="images/colour_yc02.png" alt=""/>
+                        </div>
+                        <div class="font_box">
+                            <p class="details_title">傲慢与偏见</p>
+                            <p class="details_con">《傲慢与偏见》根据简·奥斯汀小说改编，创作于2013年，致敬这部英国经典出版200周年。</p>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://piao.damai.cn/126223.html">
+                        <div>
+                            <img src="images/colour_yc03.png" alt=""/>
+                        </div>
+                        <div class="font_box">
+                            <p class="details_title">反语</p>
+                            <p class="details_con">《反语》的灵感来源自捷克共和国前总统、著名剧作家瓦茨拉法·哈维尔著名剧作《观众》。哈维尔本身也是一个传奇，他既是剧作家，也是捷克斯洛伐克联邦共和国最后一任总统和捷克独立后第一任总统。作为一国之领袖，他因出色的思想和高尚的实践，被誉为现代“哲学王”。曾获1968年奥地利国家欧洲文学奖、1990年德国书业和平奖、2010年卡夫卡文学奖。</p>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+            <ul class="details" style="margin-top: 45px;">
+                <li>
+                    <a href="https://piao.damai.cn/126211.html">
+                        <div>
+                            <img src="images/colour_yc04.png" alt=""/>
+                        </div>
+                        <div class="font_box">
+                            <p class="details_title">一窝马蜂</p>
+                            <p class="details_con">这是关注当下生活的一部作品。作为90后，没有房子的大伟为了给小柔好的生活孤注一掷去炒股，而作为80后，坚挺因为难言之隐一直和艾佳在生活上有着不和谐。</p>
+                        </div>
+                    </a>
+                </li>
+                <li class="details_two">
+                    <a href="https://piao.damai.cn/126212.html">
+                        <div>
+                            <img src="images/colour_yc05.png" alt=""/>
+                        </div>
+                        <div class="font_box">
+                            <p class="details_title">双生姊妹</p>
+                            <p class="details_con">失去了双胞胎姐姐艾娃的七旬老人艾达，一直孤独的保持着姐姐在时两个人的生活习惯。然而，一场奇异狂欢节和一个怪异的镜子迷宫使她开启了一段跨越生命和死亡的时间之旅。《双生姊妹》的故事背景设置在了英格兰哥特式的风景中，用一个梦幻般的超自然的故事探索了对生命的哀悼。</p>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://piao.damai.cn/122795.html">
+                        <div>
+                            <img src="images/colour_yc06.png" alt=""/>
+                        </div>
+                        <div class="font_box">
+                            <p class="details_title">两只狗的生活意见</p>
+                            <p class="details_con">两只狗离开家乡进入城市，他们寻找幸福的生活，寻找伟大的理想，然而城里的世界并不象他们想象得那么美好……四处碰壁之后，他们对生活产生了各种意见，这些意见是他们简单纯洁的头脑无法理解的生存难题。为了能够吃上一口饱饭，来福和旺财在街头卖艺，参加明星选秀进入娱乐界，去当保安，被富人收养又被抛弃，被打狗队打得遍体鳞伤，最后，他们决定勇敢地面对生活，不管生活有多艰辛，一定要勇敢地走下去！</p>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!--底部消息-->
+<div class="bottom">
+    <div class="bottom_box">
+        ©2016 Copyright All Rights Reserved | Privacy | Term & Conditio
+    </div>
+</div>
+<!--联系客服-->
+<div class="czy_Customerservice">
+    <ul>
+        <li>
+            <span class="close_Customerservice"></span>
+        </li>
+        <li>
+            <div></div>
+            <!--<div></div>-->
+            <p>彩之云客服服务电话：4008-893-893</p>
+        </li>
+    </ul>
+</div>
+</body>
+<script src="./../js/jquery-1.10.1.min.js"></script>
+<script src="./../js/jquery.cookie.js"></script>
+<script src="./js/colour.js"></script>
+</html>

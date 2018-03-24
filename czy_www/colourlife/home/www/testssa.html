@@ -1,0 +1,30 @@
+<html>
+   <head>
+     <meta http-equiv="Content-Type" content="text/html; charset=gbk" />
+     <title>MyFirstBaiduMap</title>
+     <script type="text/javascript" src="http://api.map.baidu.com/api?key=32ce28edca8ac5443b5d8d0a9ff91d00&v=1.1&services=true" ></script>
+ 
+   </head>
+   <body>
+     <div style="width:800px;height:600px;border:1px solid gray" id="container"></div>
+     <script type="text/javascript">
+       var map=new BMap.Map("container");
+       var lc=new BMap.LocalCity();//(Bmap.LocalCityOptions.renderOptions.map);
+       lc.get(function(lcr){       
+         if(lcr){
+           map.centerAndZoom(lcr.center,15);
+             alert(lcr.name);
+           }else{
+             alert("没能获得正确地址");   
+           }
+         })         
+         var native = new BMap.LocalCity();         
+         native.get(function(r){        
+             alert(r.name);
+         });
+         
+         
+         
+     </script>
+   </body>
+</html>

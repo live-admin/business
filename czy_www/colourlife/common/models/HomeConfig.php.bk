@@ -1,0 +1,1016 @@
+<?php
+
+/**
+ * 3.0标签 //TODO:kakatool
+ */
+class HomeConfig extends CActiveRecord
+{
+
+	public $modelName = '首页第一栏功能';
+
+	public static function model($classNeme = __CLASS__)
+	{
+		return parent::model($classNeme);
+	}
+
+	protected function getResourceUrl($url, $resourceID = 0, $verifyLogin = true)
+	{
+		if ($verifyLogin && Yii::app()->user->isGuest)
+			return  $url = '';
+
+		$resource = HomeConfigResource::model()->getResourceByKeyOrId($resourceID);
+		if ($resource) {
+			return $resource->completeURL;
+		} else {
+			return $url;
+		}
+
+		/*$resource = HomeConfigResource::model()->getAvailableResourceByPk($resourceID);
+		if ($resource) {
+			$customer = self::getCustomer();
+			if (!$customer) {
+				return $url;
+			}
+
+			$userNameEncode = urlencode($customer->username);
+			$secret = "DJKC#$%CD%des$";
+			$resouceParams = CJSON::decode($resource->parameter);
+			$arguments = '';
+			$argumentStr = '';
+
+			if (is_array($resouceParams)) {
+				foreach ($resouceParams as $_k => $_v) {
+					$arguments .= $_k . '=' . $_v . '&';
+					$argumentStr .= $_k . $_v;
+				}
+			}
+
+			$password = md5($customer->id);
+			$arguments .= sprintf(
+				'userid=%s&username=%s&mobile=%s&password=%s&cid=%s',
+				$customer->id,
+				$userNameEncode,
+				$customer->mobile,
+				$password,
+				$customer->community_id
+			);
+			$argumentStr .= sprintf(
+				'userid=%susername=%smobile=%spassword=%scid=%s',
+				$customer->id,
+				$userNameEncode,
+				$customer->mobile,
+				$password,
+				$customer->community_id
+			);
+
+
+			switch ($resource->sl_key) {
+				case '':
+					break;
+			}
+
+			return $resource->completeUrl;
+		} else {
+			return $url;
+		}*/
+	}
+
+	protected function getProtocolLink($type = '',
+	                                   $schema = 'colourlife', $action = 'proto')
+	{
+		return sprintf(
+			'%s://%s?type=%s',
+			$schema,
+			$action,
+			$type
+		);
+	}
+
+	protected function getFunc($sql = '', $params = array())
+	{
+		$command = Yii::app()->db->createCommand($sql);
+		foreach ($params as $param) {
+			$command->bindParam($param['key'], $param['value'], $param['type']);
+		}
+
+		$reader = $command->query();
+
+		$id = 0;
+		$img = '';
+		$name = '';
+		$act = '';
+		$url = '';
+		$native = '';
+		$resourceID = 0;
+		$isNew = 0;
+		$labelIcon = 0;
+		$categoryID = 0;
+		$state = 0;
+
+		$reader->bindColumn('id', $id);
+		$reader->bindColumn('img', $img);
+		$reader->bindColumn('name', $name);
+		$reader->bindColumn('act', $act);
+		$reader->bindColumn('url', $url);
+		$reader->bindColumn('native', $native);
+		$reader->bindColumn('resource_id', $resourceID);
+		$reader->bindColumn('is_new', $isNew);
+		$reader->bindColumn('label_icon', $labelIcon);
+		$reader->bindColumn('category_id', $categoryID);
+		$reader->bindColumn('state', $state);
+
+
+		$mainFuncs = array();
+
+		while ($reader->read() !== false) {
+			if ($state == 0) {
+				if ($act == 'proto') {
+					$link = $this->getProtocolLink($native);
+				} else {
+					$link = $this->getResourceUrl($url, $resourceID);
+				}
+			} else {
+				$link = '';
+			}
+
+			if ($img) {
+				$img = $this->getResourceImage($img);
+			}
+			if ($labelIcon) {
+				$labelIcon = $this->getResourceImage($labelIcon);
+			}
+
+			$mainFuncs[] = array(
+				'id' => (int)$id,
+				'img' => $img,
+				'name' => $name,
+				'url' => $link,
+				'isnew' => (int)$isNew,
+				'label_icon' => $labelIcon,
+				'category_id' => (int)$categoryID,
+			);
+		}
+
+		return $mainFuncs;
+	}
+
+
+	public function getResourceImage($img = '', $nopic = '/common/images/nopic.png')
+	{
+		$res = new PublicFunV30();
+		return $res->setAbleUploadImg($img);
+//		$img = trim($img, '/ ');
+//		if ($img) {
+//			if (strstr($img, 'v30')) {
+//				$url = F::getStaticsUrl('/common/' . $img);
+//			} else {
+//				$url = Yii::app()->ajaxUploadImage->getUrl($img);
+//			}
+//		} else {
+//			$url = F::getStaticsUrl('' . $nopic);
+//		}
+//
+//		return $url;
+	}
+
+	/**
+	 * 获取第一栏功能栏
+	 * @param int $customerID
+	 * @return array
+	 */
+	public function getTopFunc()
+	{
+		$topFuncs = array();
+		$criteria = new CDbCriteria();
+		$criteria->select = 'resource_id, name, img, url, native, act';
+		$criteria->condition = 'state = 0';
+		$criteria->order = 'sort';
+
+		$findFuncs = HomeConfigTopfunc::model()->findAll($criteria);
+		if (!$findFuncs) {
+			return $topFuncs;
+		}
+
+		foreach ($findFuncs as $func) {
+			if ($func->act == 'proto') {
+				$link = $this->getProtocolLink($func->native);
+			} else {
+				$link = $this->getResourceUrl($func->url, $func->resource_id);
+			}
+
+			if ($func->img) {
+				$img = $this->getResourceImage($func->img);
+			}
+
+			$topFuncs[] = array(
+				'img' => $img,
+				'name' => $func->name,
+				'url' => $link,
+			);
+		}
+
+
+		return $topFuncs;
+	}
+
+	public function getCustomerMainFunc($customerID = 0)
+	{
+		return $this->getFunc(
+			'SELECT
+                f.id,
+                f.img,
+                f.`name`,
+                f.act,
+                f.url,
+                f.native,
+                f.resource_id,
+                f.is_new,
+                f.label_icon,
+                f.category_id,
+                f.state
+            FROM
+                home_config_morefunc AS f
+            LEFT JOIN home_config_mainfunc_tag_relation AS t ON (f.id = t.more_function_id)
+            LEFT JOIN home_config_customer_tag_relation AS c ON (t.tag_id = c.tagid)
+            WHERE
+                c.customer_id = :customer_id
+            OR f.id IN (19, 496)
+            ORDER BY
+                f.sort',
+			array(
+				array('key' => ':customer_id', 'value' => $customerID, 'type' => PDO::PARAM_INT)
+			)
+		);
+	}
+
+	public function getCommunityMainFunc($communityID = 0)
+	{
+		return $this->getFunc(
+			'SELECT
+            DISTINCT f.id,
+            f.img,
+            f.`name`,
+            f.act,
+            f.url,
+            f.native,
+            f.resource_id,
+            f.is_new,
+            f.label_icon,
+            f.category_id,
+            f.state
+        FROM
+            home_config_morefunc AS f
+        LEFT JOIN home_config_mainfunc_more_relation AS r ON (f.id = r.more_function_id)
+        WHERE
+            r.community_id in (0, :community_id)
+        ORDER BY
+            f.sort',
+			array(
+				array('key' => ':community_id', 'value' => (int)$communityID, 'type' => PDO::PARAM_INT)
+			)
+		);
+	}
+
+	/**
+	 * 获取第二栏功能栏
+	 * @param int $communityID
+	 * @return array
+	 */
+	public function getMainFunc($communityID = 0, $customerID = 0)
+	{
+		$secondFunc = $this->getCustomerMainFunc($customerID);
+		if (!$secondFunc || count($secondFunc) != 8) {
+			$secondFunc = $this->getCommunityMainFunc($communityID);
+			if (!$secondFunc) {
+				$secondFunc = $this->getCommunityMainFunc();
+			}
+		}
+
+		//只保留8个，最后一个是更多
+		if ($secondFunc && count($secondFunc) > 8) {
+
+			$tempFunc = array();
+			$total = count($secondFunc);
+			$index = 0;
+			foreach ($secondFunc as $item) {
+
+				if ($index < 7 || $index == $total - 1) {
+					$tempFunc[] = $item;
+				}
+				$index++;
+			}
+
+			$secondFunc = $tempFunc;
+		}
+
+//		var_dump($secondFunc);
+
+		return $secondFunc;
+	}
+
+
+	protected function getAd($sql = '', $params = array())
+	{
+		$command = Yii::app()->db->createCommand($sql);
+		foreach ($params as $param) {
+			$command->bindParam($param['key'], $param['value'], $param['type']);
+		}
+
+		$reader = $command->query();
+
+		$id = 0;
+		$resourceID = 0;
+		$title = '';
+		$img = '';
+		$act = '';
+		$url = '';
+		$native = '';
+		$startTime = '';
+		$stopTime = '';
+
+
+		$reader->bindColumn(1, $id);
+		$reader->bindColumn(2, $resourceID);
+		$reader->bindColumn(3, $title);
+		$reader->bindColumn(4, $img);
+		$reader->bindColumn(5, $act);
+		$reader->bindColumn(6, $url);
+		$reader->bindColumn(7, $native);
+		$reader->bindColumn(8, $startTime);
+		$reader->bindColumn(9, $stopTime);
+
+		$firstFunc = array();
+
+		while ($reader->read() !== false) {
+
+			if ($act == 'proto') {
+				$link = $this->getProtocolLink($native);
+			} else {
+				$link = $this->getResourceUrl($url, $resourceID);
+			}
+
+			if ($img) {
+				$img = $this->getResourceImage($img);
+			}
+
+			$firstFunc[] = array(
+				'id' => (int)$id,
+				'img' => $img,
+				'name' => $title,
+				'url' => $link,
+				'start_time' => $startTime,
+				'stop_time' => $stopTime,
+			);
+		}
+
+		return $firstFunc;
+	}
+
+	private function checkAdCommunity($adID = 0, $cid = 0)
+	{
+		$relation = HomeConfigAdCommunityRelation::model()->findAll(
+			'ad_id = :ad_id',
+			array(':ad_id' => $adID)
+		);
+		if ($relation) {
+			//判断该业主所在的小区是否显示该应用
+			foreach ($relation as $k => $v) {
+				if ($v->community_id == $cid) return true;
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public function getCommunityRelatedAd($communityID = 0)
+	{
+		return $this->getAd(
+			'SELECT
+				DISTINCT a.id,
+				a.resource_id,
+				a.title,
+				a.img,
+				a.act,
+				a.url,
+				a.native,
+				a.start_time,
+				a.stop_time
+			FROM
+				home_config_ad AS a
+			LEFT JOIN home_config_ad_community_relation AS r ON (a.id = r.ad_id)
+			WHERE
+				r.community_id in(0, :community_id)
+			AND a.state = 0
+			AND IF (a.start_time = 0, TRUE, a.start_time <= :timeline)
+			AND IF (a.stop_time = 0, TRUE, a.stop_time >= :timeline)
+			ORDER BY
+				a.sort',
+			array(
+				array('key' => ':community_id', 'value' => $communityID, 'type' => PDO::PARAM_INT),
+				array('key' => ':timeline', 'value' => time(), 'type' => PDO::PARAM_INT),
+			)
+		);
+	}
+
+	/**
+	 * 获取广告
+	 * @param int $communityID
+	 * @return array
+	 */
+	public function getCommunityAd($communityID = 0)
+	{
+		$communityID = (int)$communityID;
+		$ads = $this->getCommunityRelatedAd($communityID);
+		if (!$ads) {
+			$ads = $this->getCommunityRelatedAd();
+		}
+
+		$filterAds = array();
+		if ($ads) {
+			foreach ($ads as $ad) {
+				switch ($ad['id']) {
+					case 6:
+					case 7:
+						if ($ad['start_time'] < strtotime('2015-03-31 21:59:00')
+							|| $ad['stop_time'] > strtotime('2015-05-31 23:59:59')
+						) {
+							continue 2;
+						}
+						break;
+					case 11:
+						if ($ad['start_time'] < strtotime('2015-04-23 00:00:00')
+							|| $ad['stop_time'] > strtotime('2015-05-24 23:59:59')
+						) {
+							continue 2;
+						}
+						break;
+					case 22:
+						if ($ad['start_time'] < strtotime('2015-06-08 14:00:00')
+							|| $ad['stop_time'] > strtotime('2015-06-14 22:00:00')
+						) {
+							continue 2;
+						}
+						break;
+					case 31:
+						if ($ad['start_time'] < strtotime('2015-07-21 00:00:00')
+							|| $ad['stop_time'] > strtotime('2015-08-21 23:59:59')
+						) {
+							continue 2;
+						}
+						break;
+					case 24:
+						if ($ad['start_time'] < strtotime('2015-06-15 10:00:00')
+							|| $ad['stop_time'] > strtotime('2015-06-25 17:00:00')
+						) {
+							continue 2;
+						}
+						break;
+					case 37:
+						if ($ad['start_time'] < strtotime('2015-08-05 00:00:00')
+							|| $ad['stop_time'] > strtotime('2015-10-31 23:59:59')
+						) {
+							continue 2;
+						}
+						break;
+					case 38:
+						if ($ad['start_time'] < strtotime('2015-08-15 00:00:00')
+							|| $ad['stop_time'] > strtotime('2015-10-31 23:59:59')
+						) {
+							continue 2;
+						}
+						break;
+					case 25:
+						if ($ad['start_time'] > strtotime('2015-06-30 23:59:59')) {
+							$ad['name'] = '京东特供';
+							$ad['img'] = $this->getResourceImage('v23/ad/adjd.png');
+							$ad['url'] = str_replace('/?', '/jd/?', $ad['url']);
+						}
+						break;
+				}
+
+				/*if ($this->checkAdCommunity($ad['id'], $communityID) == false) {
+					continue;
+				}*/
+
+				$filterAds[] = array(
+					'name' => $ad['name'],
+					'img' => $ad['img'],
+					'url' => $ad['url']
+				);
+			}
+		}
+
+		return $filterAds;
+	}
+
+
+	protected function getActivity($sql = '', $params = array())
+	{
+		$command = Yii::app()->db->createCommand($sql);
+		foreach ($params as $param) {
+			$command->bindParam($param['key'], $param['value'], $param['type']);
+		}
+
+		$reader = $command->query();
+
+		$id = 0;
+		$resourceID = 0;
+		$categoryID = 0;
+		$title = '';
+		$img = '';
+		$act = '';
+		$url = '';
+		$native = '';
+		$startTime = '';
+		$stopTime = '';
+		$state = '0';
+
+
+		$reader->bindColumn(1, $id);
+		$reader->bindColumn(2, $resourceID);
+		$reader->bindColumn(3, $categoryID);
+		$reader->bindColumn(4, $title);
+		$reader->bindColumn(5, $img);
+		$reader->bindColumn(6, $act);
+		$reader->bindColumn(7, $url);
+		$reader->bindColumn(8, $native);
+		$reader->bindColumn(9, $startTime);
+		$reader->bindColumn(10, $stopTime);
+		$reader->bindColumn(11, $state);
+
+		$activities = array();
+		$datetime = strtotime('today');
+		$datetimeEnd = strtotime('tomorrow');
+		while ($reader->read() !== false) {
+			if (!isset($activities[$categoryID])) {
+				$category = HomeConfigActivityCategory::model()->findByPk($categoryID);
+				if ($category) {
+					$style = $category->style;
+					$name = $category->name;
+				} else {
+					$name = '';
+					$style = '1';
+				}
+				$activities[$categoryID] = array(
+					//'id' => $categoryID,
+					'title' => $name,
+					'style' => $style,
+					'attr' => array(),
+				);
+			}
+
+			if ($act == 'proto') {
+				$link = $this->getProtocolLink($native);
+			} else {
+				$link = $this->getResourceUrl($url, $resourceID);
+			}
+
+			if ($state == 1
+				|| ($stopTime && $stopTime < $datetime)
+				|| ($startTime && $startTime > $datetimeEnd)
+			) {
+				$link = '';
+			}
+
+			if ($img) {
+				$img = $this->getResourceImage($img);
+			}
+
+			$activities[$categoryID]['attr'][] = array(
+				'id' => (int)$id,
+				'img' => $img,
+				'name' => $title,
+				'url' => $link,
+				//'start_time' => $startTime,
+				//'stop_time' => $stopTime,
+			);
+		}
+
+		return $activities ? array_values($activities) : array();
+	}
+
+	public function getCommunityRelatedActivity($communityID = 0)
+	{
+		return $this->getActivity(
+			'SELECT
+				DISTINCT a.id,
+				a.resource_id,
+				a.activity_category_id,
+				a.name,
+				a.img,
+				a.act,
+				a.url,
+				a.native,
+				a.start_time,
+				a.stop_time,
+				a.state
+			FROM
+				home_config_activity AS a
+			LEFT JOIN home_config_activity_community_relation AS r ON (a.activity_category_id = r.activity_category_id)
+			WHERE
+				r.community_id = :community_id
+			ORDER BY
+				a.activity_category_id, a.sort',
+			array(
+				array('key' => ':community_id', 'value' => $communityID, 'type' => PDO::PARAM_INT)
+			)
+		);
+	}
+
+	public function getCommunityDefaultActivity()
+	{
+		return $this->getActivity(
+			'SELECT
+				DISTINCT a.id,
+				a.resource_id,
+				a.activity_category_id,
+				a.name,
+				a.img,
+				a.act,
+				a.url,
+				a.native,
+				a.start_time,
+				a.stop_time,
+				a.state
+			FROM
+				home_config_activity AS a
+			LEFT JOIN home_config_activity_community_relation AS r ON (a.activity_category_id = r.activity_category_id)
+			WHERE
+				r.community_id = :community_id
+			ORDER BY
+				a.activity_category_id, a.sort',
+			array(
+				array('key' => ':community_id', 'value' => 0, 'type' => PDO::PARAM_INT)
+			)
+		);
+	}
+
+	protected function getCommunityCategory($communityID = 0)
+	{
+		$communityID = (int)$communityID;
+		$criteria = new CDbCriteria();
+        $criteria->select = 'c.id, c.`name`, c.style';
+        $criteria->alias = 'c';
+        $criteria->join = 'LEFT JOIN home_config_activity_community_relation AS r ON (r.activity_category_id = c.id)';
+		$criteria->condition = 'r.community_id in(:community_id, 0) AND c.state = 0 AND IF (c.start_time = 0, TRUE, c.start_time <= :timeline) AND IF (c.stop_time = 0, TRUE, c.stop_time >= :timeline)';
+		$criteria->params = array(':community_id' => $communityID, ':timeline' => time());
+        $criteria->order = 'r.community_id desc, c.id asc';
+        $criteria->limit = 1;
+		$communityCategory = HomeConfigActivityCategory::model()->find($criteria);
+        /*
+		$communityCategory = HomeConfigActivityCommunityRelation::model()->find(
+			'community_id in(:community_id, 0) AND state = 0',
+			array(
+				':community_id' => (int) $communityID
+			)
+		);
+         */
+		if (!$communityCategory) {
+			return false;
+		}
+
+        return $communityCategory;
+
+		$category = HomeConfigActivityCategory::model()->find(
+			'id = :activity_category_id AND state = 0 AND IF (start_time = 0, TRUE, start_time <= :timeline) AND IF (stop_time = 0, TRUE, stop_time >= :timeline)',
+			array(
+				':activity_category_id' => $communityCategory->activity_category_id,
+				':timeline' => time(),
+			)
+		);
+		if (!$category
+		) {
+			return false;
+		}
+
+		return $category;
+	}
+
+	/**
+	 * 获取限时活动
+	 * @param int $communityID
+	 * @return array
+	 */
+	public function getCommunityActivity($communityID = 0)
+	{
+		/*$communityID = (int)$communityID;
+		$activities = $this->getCommunityRelatedActivity($communityID);
+		if (!$activities) {
+			$activities = $this->getCommunityDefaultActivity();
+		}
+
+		return $activities;*/
+
+		$activities = array();
+
+
+		$category = $this->getCommunityCategory($communityID);
+		if (!$category) {
+			$category = $this->getCommunityCategory(0);
+			if (!$category) {
+				return $activities;
+			}
+		}
+
+		$activities = $this->getActivityByCategoryId($category->id);
+
+		return $activities ? array(
+			'title' => $category->name,
+			'style' => (int)$category->style,
+			'attr' => $activities
+		) : array();
+	}
+
+	/**
+	 * 根据板块类别获取限时活动
+	 * @param int $activityCategoryId
+	 * @return array
+	 */
+	public function getActivityByCategoryId($activityCategoryId)
+	{
+		$activities = array();
+		$datetime = strtotime('today');
+		$datetimeEnd = strtotime('tomorrow');
+
+		$criteria = new CDbCriteria();
+		$criteria->condition = 'activity_category_id = :activity_category_id AND state = 0 AND IF (start_time = 0, TRUE, start_time <= :timeline) AND IF (stop_time = 0, TRUE, stop_time >= :timeline)';
+		$criteria->params = array(':activity_category_id' => $activityCategoryId, ':timeline' => time());
+		$criteria->order = 'sort';
+
+		$categoryActivites = HomeConfigActivity::model()->findAll($criteria);
+		if (!$categoryActivites) {
+			return $activities;
+		}
+
+		foreach ($categoryActivites as $activity) {
+			if ($activity->state == 1
+				|| ($activity->stop_time && $activity->stop_time < $datetime)
+				|| ($activity->start_time && $activity->start_time > $datetimeEnd)
+			) {
+				$link = '';
+			} else {
+				if ($activity->act == 'proto') {
+					$link = $this->getProtocolLink($activity->native);
+				} else {
+					$link = $this->getResourceUrl($activity->url, $activity->resource_id, false);
+				}
+			}
+
+			$activities[] = array(
+				'img' => $this->getResourceImage($activity->img),
+				'name' => $activity->name,
+				'url' => $link,
+			);
+		}
+
+		return $activities;
+	}
+
+	protected function getCls($sql = '', $params = array())
+	{
+		$command = Yii::app()->db->createCommand($sql);
+		foreach ($params as $param) {
+			$command->bindParam($param['key'], $param['value'], $param['type']);
+		}
+
+		$reader = $command->query();
+
+		$id = 0;
+		$img = '';
+		$name = '';
+		$act = '';
+		$url = '';
+		$native = '';
+		$resourceID = 0;
+		$isNew = 0;
+		$labelIcon = 0;
+		$categoryID = 0;
+
+		$reader->bindColumn('id', $id);
+		$reader->bindColumn('img', $img);
+		$reader->bindColumn('name', $name);
+		$reader->bindColumn('act', $act);
+		$reader->bindColumn('url', $url);
+		$reader->bindColumn('native', $native);
+		$reader->bindColumn('resource_id', $resourceID);
+		$reader->bindColumn('is_new', $isNew);
+		$reader->bindColumn('label_icon', $labelIcon);
+		$reader->bindColumn('category_id', $categoryID);
+
+		$moreFunc = array();
+
+		while ($reader->read() !== false) {
+			if (!isset($moreFunc[$categoryID])) {
+				$moreFunc[$categoryID] = array(
+					'id' => (int)$categoryID,
+					'name' => HomeConfigMoreCategory::GetCategoryName($categoryID),
+					'attr' => array(),
+				);
+			}
+
+			if ($act == 'proto') {
+				$link = $this->getProtocolLink($native);
+			} else {
+				$link = $this->getResourceUrl($url, $resourceID);
+			}
+
+			if ($img) {
+				$img = $this->getResourceImage($img);
+			}
+
+			$moreFunc[$categoryID]['attr'][] = array(
+				'id' => (int)$id,
+				'img' => $img,
+				'name' => $name,
+				'url' => $link,
+				'isnew' => (int)$isNew,
+				'label_icon' => $labelIcon ? $this->getResourceImage($labelIcon) : '',
+				'category_id' => (int)$categoryID,
+			);
+		}
+
+		return $moreFunc;
+	}
+
+	public function getCommunityMoreCls($communityID = 0)
+	{
+		return $this->getCls(
+			'SELECT
+            DISTINCT m.id,
+            m.category_id,
+            m.resource_id,
+            m.`name`,
+            m.img,
+            m.act,
+            m.url,
+            m.native,
+            m.is_new,
+            m.label_icon
+        FROM
+            home_config_morefunc AS m
+        LEFT JOIN home_config_morefunc_community_relation AS c ON (m.id = c.function_id)
+        WHERE
+            c.community_id in(0, :community_id)
+        AND m.state = 0
+        ORDER BY
+            m.category_id,
+            m.sort',
+			array(
+				array('key' => ':community_id', 'value' => $communityID, 'type' => PDO::PARAM_INT)
+			)
+		);
+		/*return $this->getCls(
+			'SELECT
+			m.id,
+			m.category_id,
+			m.resource_id,
+			m.`name`,
+			m.img,
+			m.act,
+			m.url,
+			m.native,
+			m.is_new,
+			m.label_icon
+		FROM
+			home_config_morefunc AS m
+		LEFT JOIN home_config_morefunc_community_relation AS c ON (m.id = c.function_id)
+		LEFT JOIN home_config_mainfunc_more_relation AS r ON (
+			m.id = r.more_function_id
+			AND c.community_id = r.community_id
+		)
+		WHERE
+			c.community_id = :community_id
+		AND m.state = 0
+		AND ISNULL(r.id) = 1
+		ORDER BY
+			m.category_id,
+			m.sort',
+			array(
+				array('key' => ':community_id', 'value' => $communityID, 'type' => PDO::PARAM_INT)
+			)
+		);*/
+	}
+
+	/**
+	 * 获取更多
+	 * @param int $communityID
+	 * @return array
+	 */
+	public function getMoreCls($communityID = 0)
+	{
+		$moreCls = $this->getCommunityMoreCls($communityID);
+		if (!$moreCls && $communityID) {
+			$moreCls = $this->getCommunityMoreCls();
+		}
+
+		return $moreCls ? array_values($moreCls) : array();
+	}
+
+	/**
+	 * 获取板块栏
+	 * @param $sectionCode
+	 * @param $communityID
+	 * @return array
+	 */
+	public function getSectionFunc($sectionCode, $communityID=0)
+	{
+		$result = array();
+
+		$criteria = new CDbCriteria();
+		$criteria->select = 'id, name';
+		$criteria->condition = 'section_code = :section_code';
+		$criteria->params = array(':section_code' => $sectionCode);
+
+		$list = HomeConfigSectionCategory::model()->findAll($criteria);
+		if (!$list)
+			return $result;
+
+		foreach ($list as $row) {
+			$result[] = array(
+				'name' => $row->name,
+				'list' => $this->getSectionFuncByCategoryId($row->id, $communityID)
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * 根据分类获取板块栏
+	 * @param $categoryId
+	 * @param $communityID
+	 * @return array
+	 */
+	public function getSectionFuncByCategoryId($categoryId, $communityID=0)
+	{
+		$list = array();
+
+		$criteria = new CDbCriteria();
+		$criteria->select = 'id, resource_id, name, img, url, native, act';
+		$criteria->condition = 'section_category_id = :section_category_id AND state = 0';
+		$criteria->params = array(':section_category_id' => $categoryId);
+		$criteria->order = 'sort';
+
+		$findFuncs = HomeConfigSectionFunc::model()->findAll($criteria);
+		if (!$findFuncs) {
+			return $list;
+		}
+
+		foreach ($findFuncs as $func) {
+
+			$sql = 'SELECT `community_id` FROM `home_config_section_community_relation` WHERE `section_id`='.$func->id;
+			$relation = Yii::app()->db->createCommand($sql)->queryColumn();
+			if ($relation && !in_array($communityID, $relation))
+				continue;
+
+			if ($func->act == 'proto') {
+				$link = $this->getProtocolLink($func->native);
+			} else {
+				$link = $this->getResourceUrl($func->url, $func->resource_id);
+			}
+
+			if ($func->img) {
+				$img = F::getStaticsUrl('/common/' . $func->img);
+			}
+
+			$list[] = array(
+				'img' => $img,
+				'name' => $func->name,
+				'url' => $link,
+			);
+		}
+
+		return $list;
+	}
+
+	/**
+	 * 首页获取未读信息
+	 * @return array
+	 */
+	public function getUnreadPushMessage()
+	{
+
+		$user_id = Yii::app()->user->id;
+
+		$push = PushClient::model()->findBySql("SELECT `id`,`push_information_id`,`object_id`,`is_read`,`mobile`,`android_request_id`,`ios_request_id`,`create_time` FROM push_client
+		WHERE `is_read`=0 AND `object_id`=:object_id AND `type`=:type ORDER BY `create_time` DESC",
+			array(":object_id" => $user_id, ":type" => PushInformation::IS_TYPE_CUSTOMER));
+		if (!empty($push)) {
+			$info = array(
+				'id' => (int)$push->id,
+				'title' => empty($push->pushInformation) ? "" : $push->pushInformation->title,
+				'content' => empty($push->pushInformation) ? "" : $push->pushInformation->content,
+				//"is_read" =>$push->is_read,
+				"create_time" => $push->create_time,
+			);
+
+			$data = array();
+			$data[] = $info;
+
+			return $data;
+		} else {
+			return array();
+		}
+
+	}
+}

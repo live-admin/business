@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>生成小区二维码</title>
+	<link type="text/css" rel="stylesheet" href="qrcode/css/style.css" />
+	<script type="text/javascript" src="qrcode/js/jquery-1.11.1.min.js"></script>
+</head>
+<body>
+	<div class="content">
+		<div class="logo">
+			<img src="qrcode/images/logo.png"/>
+		</div>
+		<div class="search_area">
+			<input type="text"/>
+			<div class="search_list hide">
+				<p>小区</p>
+			</div>
+			<div class="button">生成二维码</div>
+		</div>
+	</div>
+</body>
+<script>
+
+	 var url =  'http://m.colourlife.com/home/';
+	//var url =  'http://m-czytest.colourlife.com/home/';
+
+	var input = $('.search_area input');
+	var input_val = input.val();
+
+	if(input_val){
+		getCommunity(input_val);
+	}
+
+	var search_list = $('.search_list');
+
+	var community_list = ""; //小区列表
+
+	var community_uuid = ""; //小区的uuid
+
+	//input聚焦
+	input.focus(function(){
+
+	});
+
+	//input失焦
+	input.blur(function(){
+
+		// search_list.addClass('hide');
+			
+	});
+
+	//input值改变
+	input.bind('input propertychange', function() {
+
+		input_val = input.val();
+		getCommunity(input_val);
+
+	});
+
+
+	$('.search_list').on('click','p',function(){
+
+		var index = $('.search_list p').index(this); //选择的是第几条加入
+
+		community_uuid = community_list[index].uuid;
+
+		input_val = input.val(community_list[index].name);
+
+		search_list.addClass('hide');
+
+	});
+
+
+	$('.search_list').hover(function(){
+		
+	})
+
+
+	$('.button').bind('click', function(){
+
+
+		if(community_uuid){
+
+			$.ajax({
+			    type:"GET",
+			    url: url + 'qrcode',
+			    data:{"community_uuid": community_uuid},
+			    dataType:'json',
+			    success:function(result){
+
+			    	if(result.retCode == 1){
+
+			    		location.href = result.data.relevance.path;
+
+			    	}
+
+			    },
+			    error: function(){
+			        
+
+			    }          
+			});	
+
+		}else{
+
+			alert('请选择要生成二维码的小区');
+			
+		}
+
+		
+
+	});
+
+
+	//community:小区的名字
+	function addDom(community){
+
+		var text = '<p>' + community + '</p>';
+		search_list.append(text);
+		
+	};
+
+
+	//communityName:社区名称
+	function getCommunity(communityName){
+
+		$.ajax({
+		    type:"GET",
+		    url: url + 'getCommunity',
+		    data:{"keyword": communityName},
+		    dataType:'json',
+		    success:function(result){
+
+		    	if(result.retCode == 1){
+
+		    		var list = result.data.list; //小区列表
+
+		    		community_list = list;
+
+		    		if(list.length >= 0){
+
+		    			search_list.removeClass('hide');
+
+		    			search_list.empty(); //清空元素
+
+		    			if(list.length == 0){
+
+		    				var community = '暂无小区';
+
+		    			}
+
+			    		for(var i = 0; i < list.length; i++){
+
+			    			var community = list[i].name || '暂无小区';
+
+			    			addDom(community);
+
+			    		}
+		    		}
+		    	}
+
+		    },
+		    error: function(){
+		        
+
+		    }          
+		});
+	};
+
+
+
+
+
+</script>
+</html>

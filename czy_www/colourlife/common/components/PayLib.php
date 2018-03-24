@@ -1,0 +1,384 @@
+<?php
+
+class PayLib
+{
+    /**
+     * 取得返回回调信息地址
+     * @param   string $code 支付方式代码
+     */
+    static function  notify_url($code)
+    {
+        return F::getOrderUrl('/api/payNotify/' . $code);
+    }
+
+    /**
+     * 取得商家后台返回信息地址
+     * @param   string $code 支付方式代码
+     */
+    static function  shop_return_url($code)
+    {
+        $code = ucfirst($code);
+        return F::getShopBackendUrl('/pay/' . $code . 'Respond');
+    }
+
+    /**
+     * 取得返回信息地址
+     * @param   string $code 支付方式代码
+     */
+    static function  return_url($code)
+    {
+        $code = ucfirst($code);
+        return F::getOrderUrl('/index/' . $code . 'Complete');
+    }
+
+    /**
+     *  取得某支付方式信息
+     * @param  string $code 支付方式代码
+     */
+    static function get_payment($code)
+    {
+        return Payment::model()->enabled()->findByCode($code);
+    }
+
+    static public function get_model_by_sn($sn)
+    {
+        return SN::findModelBySN($sn);
+    }
+
+    static public function get_modelObject_by_sn($sn)
+    {
+        return SN::findContentBySN($sn);
+    }
+
+    static public function get_status_by_sn($sn)
+    {
+        $model = self::get_modelObject_by_sn($sn);
+        if (!empty($model))
+            return $model->status;
+        return -1; // 订单状态永远不会为 -1
+    }
+
+    //根据payment 的code 得到payment_id
+    static public function get_payment_id($code)
+    {
+        return Payment::model()->find('code=:code', array(':code' => $code))->id;
+    }
+
+    /**
+     * 检查支付的金额是否与订单相符
+     *
+     * @access  public
+     * @param   string $sn sn编号
+     * @param   float $money 支付接口返回的金额
+     * @return  true
+     */
+    static function check_money($sn, $money)
+    {
+        $amount = 0;
+        $pay = Pay::getPayModel($sn);
+        if (!empty($pay))
+            $amount = $pay->amount;
+
+        if ($money == $amount)
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * @param $pay_id
+     * 根据pay_id得到订单sn集合
+     */
+    static public function getPayOrderSn($pay_id)
+    {
+        $arr = $arr1 = $a = $b = array();
+        $criteria = new CDbCriteria;
+
+        $criteria->select = 'sn'; //设置条件
+        $criteria->addCondition('pay_id=' . $pay_id);
+        $a = Order::model()->findAll($criteria);
+        $b = OthersFees::model()->findAll($criteria);
+        $arr1 = Cmap::mergeArray($a, $b);
+        if (count($arr1) > 0) {
+            foreach ($arr1 as $order) {
+                $arr[] = $order->sn;
+            }
+        }
+        return $arr;
+    }
+
+    /**
+     * @param $order_sn
+     * @return string
+     * 得到支付类名称
+     */
+    static private function getPayClassName($order_sn)
+    {
+        $model = self::get_model_by_sn($order_sn);
+        switch ($model) {
+            case 'SellerOrder':
+                $type = 'PaySellerOrder';
+                break;
+            case 'CustomerOrder':
+                $type = 'PayCustomerOrder';
+                break;
+            case 'OthersParkingFees':
+                $type = 'ParkingOrder';
+                break;
+            case 'OthersPropertyFees':
+                $type = 'PropertyOrder';
+                break;
+            case 'OthersPowerFees':
+                $type = 'PowerOrder';
+                break;
+            case 'OthersVirtualRecharge':
+                $type = 'VirtualRechargeOrder';
+                break;
+            case 'OthersAdvanceFees':
+                $type = 'AdvanceOrder';
+                break;
+            case 'PurchaseOrder':
+                $type = 'PayPurchaseOrder';
+                break;
+            case 'ThirdFees': //第三方更改数据库
+                $type = 'ThirdOrder';
+                break;
+            case 'RedpacketFees': //红包支付
+                $type = 'RedpacketFeesOrder';
+                break;
+            case 'OthersFees': //饭票券
+                $type = 'MealTicketOrder';
+                break;
+            case 'InsureOrder': //保险
+                $type = 'InsuresOrder';
+                break;
+            case 'SpecialtyOrder': //专业公司
+                $type = 'SpecialtysOrder';
+                break;
+            default:
+                $type = 'sellerOrder';
+                break;
+        }
+        return $type;
+    }
+
+    public static function getType($order_sn)
+    {
+        return self::getPayClassName($order_sn);
+    }
+
+    /**
+     * 修改状态方法(旧方法) 2017年1月17日注释
+     * 改用新的方法
+     * @param $sn
+     * @param int $payment_id
+     */
+/*     static public function order_paid($sn, $payment_id = 0, $note = '')
+    {
+        //修改支付表状态成功
+        if (Pay::updatePayBySn($sn, $payment_id)) {//不用回滚状态
+            $isTransaction = Yii::app()->db->getCurrentTransaction();//判断是否有用过事务
+            $transaction = (!$isTransaction) ? Yii::app()->db->beginTransaction() : '';
+            try {
+                $orders = Pay::getOrder($sn);
+
+                Yii::log('result_'.$sn.'_'.count($orders), CLogger::LEVEL_INFO, 'colourlife.core.ThirdOrderScan');
+
+                foreach ($orders as $order) {
+                    $order_sn = $order->sn;
+                    $order_id = $order->id;
+                    $type = self::getPayClassName($order_sn);//取得type类型
+                    $o = OrderFactory::getInstance($type); //初始化对像
+                    $o->init($order_id, $payment_id, $note); //初始化方法
+                    $o->orderProcessing(); //执行订单处理
+                }
+                Yii::log('支付回调修改状态成功流水号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+                (!$isTransaction) ? $transaction->commit() : ''; //提交事务
+            } catch (Exception $e) {
+                (!$isTransaction) ? $transaction->rollback() : ''; //回滚事务
+                Yii::log('支付回调修改状态失败：订单号：' .$sn.'，错误信息：'. $e->getMessage(), CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+            }
+        } else {
+            $pay = Pay::getPayModel($sn);
+            PayLog::createPayLog($sn, $pay->amount, $payment_id, '支付回调修改状态失败');
+            Yii::log('支付回调修改状态失败流水号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+        }
+    } */
+    /**
+     * 修改状态方法(新方法)2017年1月17日建
+     * @param $sn
+     * @param int $payment_id
+     */
+    static public function order_paid($sn, $payment_id = 0, $note = '')
+    {
+    	//修改支付表状态成功
+    	if (Pay::updatePayBySn($sn, $payment_id)) {
+    		$order = Pay::getOrder($sn);
+    		if (empty($order)){
+    			Yii::log('订单不存在', CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+    			throw new CHttpException(400, "订单不存在!");
+    		}
+    		if (count($order) > 1){
+    			Yii::log('不支持多单支付'.json_encode($order), CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+    			throw new CHttpException(400, "彩之云支付已升级，不支持多单支付!");
+    		}
+    		Yii::log('result_'.$sn.'_'.count($order), CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+    		$order_sn = $order[0]->sn;
+    		$order_id = $order[0]->id;
+    		$type = self::getPayClassName($order_sn);//取得type类型
+    		Yii::log('执行订单处理，类型：'.$type, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+    		$o = OrderFactory::getInstance($type); //初始化对像
+    		$o->init($order_id, $payment_id, $note); //初始化方法
+    		Yii::log('执行订单处理，订单号：'.$order_sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+    		$res = $o->orderProcessing(); //执行订单处理
+            if(!$res){
+                throw new CHttpException(400, "订单处理失败!");
+            }
+    	} else {
+    		$pay = Pay::getPayModel($sn);
+    		PayLog::createPayLog($sn, $pay->amount, $payment_id, '支付回调修改状态失败');
+    		Yii::log('支付回调修改状态失败流水号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+            throw new CHttpException(400, "支付回调修改状态失败!");
+    	}
+    }
+
+    /**
+     * 修改状态方法 T+0 支付(旧方法)
+     * @param $sn
+     * @param int $payment_id
+     */
+/*     static public function order_paid_kkpay($sn, $payment_id = 0, $note = '')
+    {
+        //修改支付表状态成功
+        if (Pay::updatePayBySn($sn, $payment_id)) {//不用回滚状态
+            $isTransaction = Yii::app()->db->getCurrentTransaction();//判断是否有用过事务
+            $transaction = (!$isTransaction) ? Yii::app()->db->beginTransaction() : '';
+            try {
+                $orders = Pay::getOrder($sn);
+
+                Yii::log('result_'.$sn.'_'.count($orders), CLogger::LEVEL_INFO, 'colourlife.core.ThirdOrderScan');
+
+                foreach ($orders as $order) {
+                    $order_sn = $order->sn;
+                    $order_id = $order->id;
+                    $type = self::getPayClassName($order_sn);//取得type类型
+                    $o = OrderFactory::getInstance($type); //初始化对像
+                    $o->init($order_id, $payment_id, $note); //初始化方法
+                    $o->updatePayStatus(); //执行订单处理
+                }
+                (!$isTransaction) ? $transaction->commit() : ''; //提交事务
+                Yii::log('支付回调修改状态成功流水号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+            } catch (Exception $e) {
+                (!$isTransaction) ? $transaction->rollback() : ''; //回滚事务
+                Yii::log('支付回调修改状态失败，订单号：' .$sn.'，错误信息：'. $e->getMessage(), CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+            }
+        } else {  
+            $pay = Pay::getPayModel($sn);
+            PayLog::createPayLog($sn, $pay->amount, $payment_id, '支付回调修改状态失败');
+            Yii::log('支付回调修改状态失败流水号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+        }
+    } */
+    /**
+     * 修改状态方法 T+0 支付（新方法），去掉最外层事务，不支持多单支付
+     * @param $sn
+     * @param int $payment_id
+     */
+    static public function order_paid_kkpay($sn, $payment_id = 0, $note = '')
+    {
+    	//修改支付表状态成功
+    	if (Pay::updatePayBySn($sn, $payment_id)) {//不用回滚状态
+    		try {
+    			$orders = Pay::getOrder($sn);
+    			if (empty($orders)){
+    				Yii::log('订单不存在', CLogger::LEVEL_INFO, 'colourlife.core.PayLib.kkpay');
+    				throw new CHttpException(400, "订单不存在!");
+    			}
+    			if (count($orders) > 1){
+    				Yii::log('不支持多单支付'.json_encode($orders), CLogger::LEVEL_INFO, 'colourlife.core.PayLib.kkpay');
+    				throw new CHttpException(400, "彩之云支付已升级，不支持多单支付!");
+    			}
+    			Yii::log('result_'.$sn.'_'.count($orders), CLogger::LEVEL_INFO, 'colourlife.core.PayLib.kkpay');
+    			$order_sn = $orders[0]->sn;
+    			$order_id = $orders[0]->id;
+    			$type = self::getPayClassName($order_sn);//取得type类型
+    			$o = OrderFactory::getInstance($type); //初始化对像
+    			$o->init($order_id, $payment_id, $note); //初始化方法
+    			$o->updatePayStatus(); //执行订单处理
+    			Yii::log('支付回调修改状态成功流水号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib.kkpay');
+    		} catch (Exception $e) {
+    			Yii::log('支付回调修改状态失败，订单号：' .$sn.'，错误信息：'. $e->getMessage(), CLogger::LEVEL_INFO, 'colourlife.core.PayLib.kkpay');
+    		}
+    	} else {
+    		$pay = Pay::getPayModel($sn);
+    		PayLog::createPayLog($sn, $pay->amount, $payment_id, '支付回调修改状态失败');
+    		Yii::log('支付回调修改状态失败流水号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib.kkpay');
+    	}
+    }
+
+
+
+    /**
+     * 修改状态方法POS机专用
+     * @param $sn 订单号
+     * @param int $payment_id 支付方式 88=>pos机支付
+     */
+    static public function order_paid_pos($sn, $order_id, $payment_id = Item::POS_PAYMENT_STATUS, $note = '')
+    {
+        
+        $isTransaction = Yii::app()->db->getCurrentTransaction();//判断是否有用过事务
+        $transaction = (!$isTransaction) ? Yii::app()->db->beginTransaction() : '';
+        try {
+            //$orders = Pay::getOrder($sn);
+            //foreach ($orders as $order) {
+                //$order_sn = $order->sn;
+                //$order_id = $order->id;
+                $type = self::getPayClassName($sn);//取得type类型
+                // var_dump($type);die;
+                $o = OrderFactory::getInstance($type); //初始化对像
+                $o->init($order_id, $payment_id, $note); //初始化方法
+                $o->orderProcessing(); //执行订单处理
+            // }
+            Yii::log('POS支付回调修改状态成功,订单号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+            (!$isTransaction) ? $transaction->commit() : ''; //提交事务
+        } catch (Exception $e) {
+            (!$isTransaction) ? $transaction->rollback() : ''; //回滚事务
+        }
+    }
+
+
+
+    /**
+     * 对帐修改状态方法(此方法为对帐使用，会判断订单状态为0或都97状态才会去执行)
+     * @param $sn
+     * @param int $payment_id
+     */
+    static public function updatePayOrder($sn, $payment_id = 0, $note = '')
+    {
+        $isTransaction = Yii::app()->db->getCurrentTransaction();//判断是否有用过事务
+        $transaction = (!$isTransaction) ? Yii::app()->db->beginTransaction() : '';
+        try {
+            //修改支付表状态失败
+            if (Pay::updatePayBySn($sn, $payment_id)) {
+                $orders = Pay::getOrder($sn);
+                foreach ($orders as $order) {
+                    $order_sn = $order->sn;
+                    $order_id = $order->id;
+                    $model = self::get_modelObject_by_sn($order_sn);
+                    if ($model->status == Item::ORDER_AWAITING_PAYMENT || $model->status == Item::ORDER_CANCEL_CLOSE) {
+                        $type = self::getPayClassName($order_sn);//取得type类型
+                        $o = OrderFactory::getInstance($type); //初始化对像
+                        $o->init($order_id, $payment_id, $note); //初始化方法
+                        $o->orderProcessing(); //执行订单处理
+                    }
+                }
+                Yii::log('支付回调修改状态成功流水号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+            } else {
+                Yii::log('支付回调修改状态失败流水号：' . $sn, CLogger::LEVEL_INFO, 'colourlife.core.PayLib');
+            }
+            (!$isTransaction) ? $transaction->commit() : ''; //提交事务
+        } catch (Exception $e) {
+            (!$isTransaction) ? $transaction->rollback() : ''; //回滚事务
+        }
+    }
+
+}

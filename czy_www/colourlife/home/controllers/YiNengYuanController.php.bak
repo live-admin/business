@@ -1,0 +1,442 @@
+<?php
+
+class YiNengYuanController extends  CController
+{
+    protected $modelName = 'OthersPowerFees';
+
+    public $_userId = 0;
+    public $_username = "";
+    public $_cust_model="";
+    public $objectLabel = '物业费';
+
+    /**
+     * 权限控制
+     * @return array
+     */
+    public function accessRules()
+    {
+        return array(
+            array('allow',
+                'actions' => array('index', 'view', 'log','AddPower','Pay_Success','buy_detail_over','buy_detail_over','buy_detail_success','buy_detail_yfk'), // 列表 查看
+                'expression' => '$user->checkAccess("op_backend_powerFees_view")',
+            ),
+            array('allow',
+                'actions' => array('update','report', 'fillOrders','disposal','getRechargeCode'), // 编辑
+                'expression' => '$user->checkAccess("op_backend_powerFees_update")',
+            ),
+
+            array('deny', // deny all users
+                'users' => array('*'),
+            ),
+        );
+    }
+    
+
+
+   //回调函数
+   public function actionAjax(){
+       $error="";
+   
+        if(isset($_POST))
+        {
+        
+            if(!empty($_POST['customer_id']) && !empty($_POST['meter'])){
+                
+                
+                
+                
+            
+            $model = new PowerAddress('apiCreate');
+            $model->attributes = $_POST;
+            
+            $find = PowerAddress::model()->find("meter=:meter",array(':meter'=>$_POST['meter']));
+            if($find){
+                $error='该卡号已经被绑定！请重新输入电表卡号';
+                
+                   
+         
+                echo json_encode(array('code'=>0, 'msg'=>$error));  
+              exit;
+            }
+            
+            Yii::import('common.api.StarApiNew');
+            $star=StarApiNew::getInstance();
+            $result = $star->callCheckMeterNo($_POST['meter']);
+            if($result->CheckMeterNoResult!=0)
+            {           
+                 $error='电表卡号不存在！请重新输入电表卡号';
+                 echo json_encode(array('code'=>0, 'msg'=>$error));  
+               
+             exit; 
+            }
+
+         
+            //CheckMeterNoResult 0 表示成功返回
+            if($result->CheckMeterNoResult==0){
+            
+            
+            $model->customer_name = $result->CustomerName;
+            $model->meter_address = $result->CustomerAddress;
+                     
+            echo json_encode( array('code'=>1,'msg'=>$error,'data'=>array('customer_name'=>$result->CustomerName,'meter_address'=>$result->CustomerAddress)));    
+            } 
+            
+            }
+
+            }
+           }
+    
+    //添加电表
+    public   function actionAddPower(){
+  
+      
+        if(!empty($_GET['meter']) && !empty($_GET['customer_name']) && !empty($_GET['community_name'])  && !empty($_GET['customer_id'])){
+            
+            
+            
+        $customer_id=$_GET['customer_id'];  
+        $cu_model=Customer::model();
+        $result=$cu_model->find('id=:id',array(':id'=>$customer_id));
+        
+        $community_id=$result->community_id;  
+          //电表号
+        $meter=$_GET['meter'];
+        //电表签约姓名
+        $customer_name=$_GET['customer_name'];      
+        $model=new PowerAddress();
+        $model->customer_id=$customer_id;
+        $model->meter_address=$_GET['community_name'];        
+        $model->community_id=$community_id;
+        $model->meter=$meter;
+        $model->customer_name=$customer_name;
+        $model->last_time=time();     
+        $model->save();
+        $this->redirect ('Buy?cust_id='.$_GET['customer_id']);    
+        }
+       $this->renderPartial('add'); 
+    }
+   
+   //支付成功    
+    public   function actionPay_Success(){
+
+        
+        
+       $this->renderPartial('pay_success'); 
+    }
+   //商铺买电  
+    public   function actionBuy(){
+        
+      $cust_id=$this->checkLogin();
+      $model=PowerAddress::model(); 
+      $result=$model->findAll('customer_id=:customer_id and is_deleted=:is_deleted',array(':customer_id'=>$cust_id,':is_deleted'=>0));
+ 
+      $this->renderPartial('buy',array('data'=>$result)); 
+    }
+    //删除电表
+   public  function actionDeletePower(){
+     $id=Yii::app()->request->getParam('id');
+   
+     
+     $model = PowerAddress::model()->find('id=:id',array(':id'=>$id));
+    
+     if ($model) {
+         $model->is_deleted = 1;
+         if ($model->update()) {
+        
+             echo json_encode(array('code'=>1)); 
+         }
+        
+     }
+
+
+        
+
+       
+   }
+     //购电详情--交易关闭 
+      public   function actionbuy_detail_over(){
+
+        
+        
+       $this->renderPartial('buy_detail_over'); 
+    }
+     
+    //购电详情--交易成功 
+      public   function actionbuy_detail_success(){
+
+        
+        
+       $this->renderPartial('buy_detail_success'); 
+    }
+    
+       //购电详情--已付款
+      public   function actionbuy_detail_yfk(){
+
+        
+        
+       $this->renderPartial('buy_detail_yfk'); 
+    }
+    
+    
+    public function checkLogin(){
+        if (empty($_REQUEST['cust_id']) && empty($_SESSION['cust_id'])){
+        	exit('<h1>用户信息错误，请重新登录</h1>');
+		}else {
+			$custId=0;
+			if(isset($_REQUEST['cust_id'])){  //优先有参数的
+				$custId=intval($_REQUEST['cust_id']);
+				$_SESSION['cust_id']=$custId;
+			}else if(isset($_SESSION['cust_id'])){  //没有参数，从session中判断
+				$custId=$_SESSION['cust_id'];
+			}
+			$customer=Customer::model()->find("id=:id and state = 0", array('id' => $custId));
+			if(empty($custId) || empty($customer)){
+				exit('<h1>用户信息错误，请重新登录</h1>');
+			}
+                   $this->_userId=$custId;     
+    		  return  $custId;
+    		
+    		
+		}
+              
+    }
+   
+         //购电详情--已退款
+      public   function actionbuy_detail_ytk($sn){
+          $connection=Yii::app()->db;
+          $sql ="select ot.customer_id,ot.sn,po.meter,po.meter_address,
+                po.customer_name,
+                ot.create_time as create_time,
+                ot.amount,ot.red_packet_pay,
+                ot.pay_id,po.recharge_code as token,
+                case ot.status
+                when 0 then '待付款' 
+                when 1 then '已付款'
+                when 90 then '已退款'
+                when 96 then '交易失败'
+                when 97 then '交易失败'
+                when 98 then '交易关闭'
+                when 99 then '交易成功'
+                when 101 then '已付款' end as status
+                 from others_fees ot LEFT JOIN power_fees po 
+                on ot.object_id=po.id where ot.sn='$sn'"; 
+          $command = $connection->createCommand($sql);
+          $result = $command->queryAll();
+
+       $this->renderPartial('buy_detail_ytk',array('data'=>$result));       
+    }
+    
+         //购买充值卡
+      public   function actionbuy_recharge(){
+
+        
+        
+       $this->renderPartial('buy_recharge');       
+    } 
+    
+        //购电记录
+      public   function actionbuy_record(){
+          
+         $meter=Yii::app()->request->getParam('meter'); 
+       
+        $connection=Yii::app()->db;
+        $sql = "select ot.sn, FROM_UNIXTIME(ot.create_time,'%Y-%m-%d    %H:%i') as create_time,ot.update_time,ot.amount,
+         case ot.status
+         when 0 then '待付款' 
+         when 1 then '已付款'
+         when 90 then '已退款'
+         when 96 then '交易失败'
+         when 97 then '交易失败'
+         when 98 then '交易关闭'
+         when 99 then '交易成功'
+         when 101 then '已付款' end as status
+        from others_fees ot LEFT JOIN power_fees po on ot.object_id=po.id where po.meter='$meter' order by ot.update_time desc";
+    
+        $command = $connection->createCommand($sql);
+        $result = $command->queryAll();    
+   
+        
+       $this->renderPartial('buy_record',array('data'=>$result));       
+    } 
+    
+          //查看电表卡号
+      public   function actionselect_ammeter(){
+  
+          
+          
+          
+          
+       $this->renderPartial('select_ammeter');       
+    } 
+    //保存订单
+    public function actionSave_sn(){
+        
+        
+        $sn=SN::initByPowerFees()->sn;
+        $cust_id=$_POST['customer_id'];
+        $amount=$_POST['amount'];
+        $ip=Yii::app()->request->userHostAddress;
+        //兼容新接口和老接口
+        $result=array();
+        Yii::import('common.api.StarApiNew');
+        $star=StarApiNew::getInstance();
+        $sn=SN::initByPowerFees()->sn;
+        $result=$star->callPurchasePower($_POST['meter'],$_POST['amount'],$sn);
+        $token="";
+        if($result->PurchasePowerResult==0){
+        $token=$result->Token;
+        $STOrderNo=$result->STOrderNo;
+        }
+        
+        
+        //如果新街口查不到数据再调用老接口 
+        if(count($result)==0){
+        Yii::import('common.api.StarApi');
+        $star2=StarApi::getInstance();
+        $sn=SN::initByPowerFees()->sn;
+        $result=$star2->callPurchasePower($_POST['meter'],$_POST['amount'],$sn);
+        if($result->PurchasePowerResult==0)
+        $token=$result->Token;
+        $STOrderNo=$result->STOrderNo;
+        }
+        
+        
+        $model_PowerFees=new PowerFees();
+        $model_Customer=Customer::model();
+        $result_Customer=$model_Customer->find('id=:id',array(':id'=>$cust_id));
+        
+        $model_PowerFees->community_id=$result_Customer->community_id;
+        $model_PowerFees->build=$result_Customer->build_id;
+        $model_PowerFees->room=$result_Customer->room;
+        $model_PowerFees->meter=Yii::app()->request->getParam('meter');
+        $model_PowerFees->customer_name=Yii::app()->request->getParam('customer_name');
+        $model_PowerFees->meter_address=Yii::app()->request->getParam('meter_address');
+        $model_PowerFees->interface_order=$STOrderNo;
+        $model_PowerFees->recharge_code=$token;
+        $model_PowerFees->save();
+        
+        $model=new OthersFees();
+        $model->sn=$sn;
+        $model->customer_id=$cust_id;
+        $model->model="PowerFees";
+        $model->amount=$amount;
+        $model->create_ip=$ip;
+        $model->create_time=time();
+        $model->bank_pay=0.00;
+        $model->red_packet_pay=0.00;
+        $model->user_red_packet=0;
+        if($model_PowerFees->save()){
+        $model->object_id=$model_PowerFees->id;    
+        }
+        
+        $model->note="";
+        $model->pay_rate=0;
+        $model->payment_id=0;
+        $model->token=$token;
+        $model->save();
+        if($model->save()){
+          echo json_encode(array('status'=>1,'msg'=>'保存成功','sn'=>$sn));      
+        }else{
+          echo json_encode(array('status'=>0,'msg'=>'保存失败'));    
+        }
+        
+            
+        
+    }
+    
+    //检查并更新订单
+    public function actionUpdateSn(){
+    if (isset($_POST)) {
+           
+            $use_bank_or_not=1;
+            $other = new OthersFees();
+            $other->attributes = $_POST;
+            $other->setAttribute("customer_id",Yii::app()->user->id);
+
+            $bank_pay = isset($_POST['bank_pay'])?$_POST['bank_pay']:"0.00";
+            $amount = isset($_POST['amount'])?$_POST['amount']:"0.00";
+            $red_packet_pay = isset($_POST['red_packet_pay'])?$_POST['red_packet_pay']:"0.00";
+            $other["bank_pay"]=F::priceFormat($bank_pay);
+            $other["amount"]=F::priceFormat($amount);
+            $other["red_packet_pay"]=F::priceFormat($red_packet_pay);
+
+            $orderFees=$other->checkOrderFees();
+            if(isset(Yii::app()->config->SwitchPowerRedPacket)){
+                $config = Yii::app()->config->SwitchPowerRedPacket;
+                if(!$config && $other["red_packet_pay"]>0 && isset($_POST['red_packet_pay'])){
+                    throw new CHttpException(400,"暂时不能使用红包支付");
+                }
+            }
+            $total=$other["bank_pay"]+$other["red_packet_pay"];
+            if($other["red_packet_pay"]==$other['amount'] && $other["red_packet_pay"]>0 && $total==$other['amount']){
+                $use_bank_or_not=0;
+                //$other->status=Item::FEES_TRANSACTION_SUCCESS;
+            }else if( $total!=$other['amount'] || $other["red_packet_pay"]<0){
+                throw new CHttpException(400,"下单失败");
+            }
+            if($orderFees['result']){
+                $model = new PowerFees('create');
+                $model->attributes = $_POST;
+                if ($model->save()) {
+                    $other->model = 'PowerFees'; //$model->tableName();
+                    $other->object_id = $model->id;
+                    $other->customer_id = Yii::app()->user->id;
+                    $other->sn = SN::initByPowerFees()->sn;
+                    if($other->save()){
+                        if($other["red_packet_pay"]==$other['amount'] && $other["red_packet_pay"]>0 && $total==$other['amount']){
+                            $pay = new PayOrderForm();
+                            $pay->order_sn =array($other->sn);
+                            $pay->pay_sn = $other->sn;
+                            $paySn = $pay->createPay();
+                            //$payInfo = Pay::getModel($paySn);
+                            PayLib::order_paid( $paySn,0,'全额红包支付');
+                        }
+                    }else {
+                        throw new CHttpException(400, $this->errorSummary($other));
+                    }
+                } else {
+                    throw new CHttpException(400, $this->errorSummary($model));
+                }
+                Yii::log("小区：{$model->community_id}，电表：{$model->meter}，电表地址：{$model->meter}，sn：{$other->sn}，金额：{$other->amount}，用户：{$other->customer_id}", CLogger::LEVEL_INFO, 'colourlife.api.powerfees.create');
+                OthersFeesLog::createOtherFeesLog($other->id, 'Customer', Item::FEES_AWAITING_PAYMENT, Yii::app()->user->id . '商铺买电下单');
+            }else if(!$orderFees['result']){
+                throw new CHttpException(400,$orderFees["error"]);
+            }
+        }
+        $content = SN::findContentBySN($other->sn);
+        echo CJSON::encode(array(
+            'ok' => 1,
+            'id' => $other->id,
+            'SN' => $other->sn,
+            'use_bank_or_not'=>$use_bank_or_not,
+            'status'=>$content->status
+        ));
+    }
+      //调用原生支付
+    public function actionPayFromHtml5($sn){
+       
+      
+        $model = SN::findContentBySN($sn);
+        //如果不为未支付直接跳转到首页
+      // if($model->status!=Item::ORDER_AWAITING_PAYMENT)
+      //      $this->redirect('/buy');
+			
+        $url = Yii::app()->request->hostInfo.CHtml::normalizeUrl('/YiNengYuan/pay_success');
+        $this->render('payFromHtml5',array('sn' => $sn,'url'=>$url));
+    } 
+    
+
+    
+    //红包支付直接成功
+    public function actionSuccess($sn)
+    {
+        $model = SN::findContentBySN($sn);
+        //如果不为未支付直接跳转到首页
+        //if($model->status!=Item::ORDER_AWAITING_PAYMENT)
+        //    $this->redirect('/goods');
+ 
+        $this->render('success', array('model' => $model));
+    }
+
+    
+}

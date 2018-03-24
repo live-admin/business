@@ -1,0 +1,178 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: chenql
+ * Date: 2016/5/16
+ * Time: 10:51
+ */
+class MeetSignController extends CController
+{
+    private $_userId=0;
+
+    public function  actionIndex($id){
+        $from_type = Yii::app()->request->getParam('from_type');          //扫描途径
+        $from_account = Yii::app()->request->getParam('from_account');    //来源ID
+        //$customerId =intval(Yii::app()->request->getParam('cust_id'));
+        $meet_id = floatval($id);
+        $model = Meeting::model()->findByPk($meet_id);
+        $meet_time = $model->meet_time;
+        $time_arr = explode(' / ',$meet_time);
+        $this->renderPartial('index', array(
+            'model' => $model ,
+            'time' => $time_arr ,
+            //'cust_id' => $customerId,
+            'from_type' => $from_type,
+            'from_account' => $from_account,));
+    }
+
+    /*是否在规定时间内*/
+    protected function timeCheck($meet_time){
+        $time = time();
+        //$str="2016-05-16 09:00 / 2016-05-16 09:30 / 2016-06-01 09:00 / 2016-06-01 19:00";
+        $time_arr = explode(' / ',$meet_time);    //strtotime
+        //dump(strtotime($time_arr[3]));
+        $tem = false;
+        for($i=0; $i<sizeof($time_arr); $i=$i+2){
+            if(  strtotime($time_arr[0+$i])<$time && $time<strtotime($time_arr[$i+1] )){
+                $tem = true;
+                break;
+            }else{
+                //return false;
+            }
+        }
+        return $tem;
+    }
+
+
+    /*
+     * 判断是否在规定时间内签过到
+     * */
+    protected function isSign($OA , $meet_time , $meet_id){
+        $time = time();
+        $meet_time="2016-06-30 09:00 / 2016-06-30 19:30 / 2016-06-01 09:00 / 2016-06-01 19:00";
+        $time_arr = explode(' / ',$meet_time);    //strtotime
+        //dump(strtotime($time_arr[3]));
+        $tem = false;
+        for($i=0; $i<sizeof($time_arr); $i=$i+2){
+            $isSign = MeetingSign::model()->find('oa_username=:oa_username and  meet_id=:meet_id and sign_time>=:start_time and sign_time<=:end_time',
+                array(':oa_username'=>$OA , ':meet_id'=>$meet_id , ':start_time'=>strtotime($time_arr[0+$i]) , ':end_time'=>$time<strtotime($time_arr[$i+1])));
+            if($isSign){
+                $tem = true;
+                break;
+            }else{
+                return false;
+            }
+        }
+        return $tem;
+    }
+
+
+
+    public function actionSign(){
+        $id = intval(Yii::app()->request->getParam('id'));                  //会议ID
+        $mobile = Yii::app()->request->getParam('mobile');                 //手机号码
+        $sign_location = Yii::app()->request->getParam('sign_location');   //签到地点
+        $OA = Yii::app()->request->getParam('OA');                        //OA账号
+        $from_type = Yii::app()->request->getParam('from_type');          //扫描途径
+        $from_account = Yii::app()->request->getParam('from_account');    //来源ID
+        $model = Meeting::model()->findByPk($id);
+        $meet_time = $model->meet_time;
+        $signTime = time();
+        if($this->isSign($OA, $meet_time , $id)){
+            echo json_encode(array('status'=>0,'param'=>'您已经在该时间内签过到了！'));
+            return 0;
+        }//签到时间
+        if($this->timeCheck($meet_time)){     	
+            $meetSign = new MeetingSign();
+            $meetSign->from_type = $from_type;
+            $meetSign->from_account = $from_account;
+            $meetSign->oa_username = $OA;
+            $meetSign->user_mobile= $mobile;
+            $meetSign->meeting_id =$id;
+            $meetSign->sign_time = $signTime;
+            $meetSign->sign_location = $sign_location;
+            if($meetSign->save()){
+                echo json_encode(array('status'=>1,'param'=>'签到成功'));
+                return 0;
+            }else{
+                echo json_encode(array('status'=>0,'param'=>'签到失败'));
+                return 0;
+            }
+        }else{
+            echo json_encode(array('status'=>0,'param'=>'请在规定时间内签到'));
+            return 0;
+        }
+    }
+
+
+    /*
+    * 彩住宅发饭票*/
+    public function actionFan(){
+        //根据当前SESSION生成随机数
+        $code = mt_rand(0,1000000);
+        $_SESSION['code'] = $code;
+        $customerId =intval(Yii::app()->request->getParam('cust_id'));
+        $customerId = $customerId * 778 + 1778;
+        $this->renderPartial('ticket' , array('cust_id' => $customerId, 'code'=>$code));
+    }
+
+    /*
+     * 彩住宅发饭票*/
+    public function actionMeal(){
+        if(isset($_POST['code'])){
+            if($_POST['code'] != $_SESSION['code']){
+                echo json_encode(array('status'=>2,'param'=>'请不要重复提交！'));
+            }
+        }
+        $startTime = strtotime("2016-06-28 12:00:00");       //活动开始时间
+        $endTime = strtotime("2016-09-03 23:59:59");         //活动结束时间
+        $customerId =intval(Yii::app()->request->getParam('cust_id'));
+        $customerId = ($customerId - 1778) / 778;
+        $customer = Customer::model()->findByPk($customerId);
+        if(empty($customer)){
+            echo json_encode(array('status'=>2,'param'=>'请使用彩之云扫描领取饭票哦！'));
+            return 0;
+        }
+        if($customer['community_id'] != 2274){//2274
+            echo json_encode(array('status'=>2,'param'=>'您不在指定小区不能领取哦！'));
+            return 0;
+        }
+        $mobile = $customer['mobile'];
+        $note = '黄梅县彩住宅饭票发放';
+        $is_send1 = HourseMobile::model()->find('mobile=:mobile', array(':mobile'=>$mobile));
+        $is_send2 = RedPacketCarry::model()->find('receiver_id=:receiver_id and note=:note',array(':receiver_id'=>$customerId, ':note'=>$note));
+        if($is_send1 || $is_send2){//限定号码
+            echo json_encode(array('status'=>2,'param'=>'您已经领取过饭票，不能再领取饭票了哦！'));
+            return 0;
+        }
+        $time = time();
+        if($time <= $startTime){
+            echo json_encode(array('status'=>0,'param'=>'还未到领取时间哦，稍等一会就好！'));
+            return 0;
+        }
+        if($time >= $endTime){
+            echo json_encode(array('status'=>0,'param'=>'饭票领取活动已结束了，欢迎下次参与哦！'));
+            return 0;
+        }
+        //扣款账户
+        $cmobile=20000000006;
+        $cmobile_id = 2252538;
+        $sendModel = Customer::model()->findByPk($cmobile_id);
+        $balance = $sendModel['balance'];
+        if($balance<50){
+            echo json_encode(array('status'=>0,'param'=>'饭票领取活动已结束，欢迎下次参与哦！'));//钱完了
+            return 0;
+        }
+        $amount = 50;
+        $rebateResult=RedPacketCarry::model()->customerTransferAccounts($cmobile_id,$customerId,$amount,1,$cmobile,$note);
+        if ($rebateResult['status']==1){
+            Yii::log('黄梅县彩住宅发布会发放体验饭票成功： customer_id：'.$customerId.' 时间：'.time() , CLogger::LEVEL_INFO, 'colourlife.core.CAI_HOUSE.Meal');
+            echo json_encode(array('status'=>1,'param'=>'饭票领取成功，快去彩之云体验饭票吧！'));
+            return 0;
+        }else {
+            Yii::log('黄梅县彩住宅发布会发放体验饭票失败： customer_id：'.$customerId.' 时间：'.time() , CLogger::LEVEL_INFO, 'colourlife.core.CAI_HOUSE.Meal');
+            echo json_encode(array('status'=>0,'param'=>'亲，网络不给力哦！'));
+            return 0;
+        }
+    }
+}

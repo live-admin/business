@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>交易详情</title>
+	<link type="text/css" rel="stylesheet" href="css/normalize.css" />
+	<link type="text/css" rel="stylesheet" href="css/public.css" />
+	<link type="text/css" rel="stylesheet" href="css/paystate.css" />
+	<!-- 日历插件 -->
+	<link rel="stylesheet" href="css/jquery-ui.min.css">
+    <script  type="text/javascript" src="js/jquery-1.10.1.min.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script  type="text/javascript" src="js/jquery-ui.min.js"></script>
+	<script  type="text/javascript" src="js/jquery.ui.datepicker-zh-CN.js"></script>
+	<script type="text/javascript" src="js/search.js"></script>
+     <script type="text/javascript" src="js/vue.js"></script>
+	<script type="text/javascript" src="js/md5.js"></script>
+</head>
+<body>
+	<!--客服电话-->
+	<div class="czy_Customerservice">
+		<ul>
+			<li>
+				<span class="close_Customerservice"></span>
+			</li>
+			<li>
+				<div></div>
+				<!--<div></div>-->
+				<p>彩之云客服服务电话：4008-893-893</p>
+			</li>
+		</ul>
+	</div>
+	<div class="content-wrap order-wrap">
+		<div class="nav">
+			<div class="login" style="width:100%;height:45px;">
+				<ul class="Customers">
+					<li id="userInfo">你好，<span class="twoczy_username"></span>&nbsp;&nbsp;<span class="Sign_out">退出</span>&nbsp;</li>
+					<li id="orderInfo"><a href="order.html">我的订单</a></li>
+					<li class="app_Customer"><a href="javascript:void(0)">联系客服</a></li>
+				</ul>
+			</div>
+			<ul class="headers">
+				<li>
+					<img src="img/czy_logos.png" alt="">
+				</li>
+				<li>
+					<ul class="navigation">
+						<!--<li><a href="czy_home/colourProduct.html">产品介绍</a></li>-->
+						<li class="search" style="margin-right: 0px;">
+							<img src="img/sous.png" alt="">
+						</li>
+						<li class="colourCommunity"><a href="javascript:;">彩.社区</a></li>
+						<li><a href="buyElectricity.html">买电</a></li>
+						<li><a href="colourPayFee.html">缴费</a></li>
+						<li><a href="http://www.qianshenghua.com/colourlifecenter/index.do">彩富人生</a></li>
+						<li><a href="colourHouse.html">彩住宅</a></li>
+						<li style="margin-left:0;"><a href="../index.html">首页</a></li>
+					</ul>
+					<ul class="header_list" style="display: none">
+						<li style="margin-right: 0px;" class="search_two">
+							<img src="Community/images/sous.png" alt="">
+						</li>
+						<li><a href="Community/colour_sports.html">彩.竞技</a></li>
+						<li><a href="Community/colour_live.html">彩.直播</a></li>
+						<li><a href="Community/colour_comic.html">动.漫</a></li>
+						<li><a href="Community/colour_activities.html">社区活动</a></li>
+						<li><a href="Community/colour_play.html">演出剧</a></li>
+						<li><a href="Community/colour_community.html">彩.社区</a></li>
+						<li style="margin-left:0;"><a href="./../index.html">首页</a></li>
+					</ul>
+					<ul class="sou_banner">
+						<li></li>
+						<li>
+							<input type="text" value="请输入搜索内容" onfocus="this.value='';">
+						</li>
+						<li></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="details">
+		<div class="paystate_state">
+			<div class="stateshow wrap" v-if="Whether==true">
+				<h3>交易详情</h3>
+				<div class="showpng">
+				   <img src="img/smeil.png" alt="">
+				<p>交易成功</p>
+				</div>
+			</div>
+			<div class="stateshow wrap" v-if="Whether==false">
+				<h3>交易详情</h3>
+				<div class="showpng">
+					<img src="img/pay_close.png" alt="">
+					<p id="buy_close">交易关闭</p>
+				</div>
+			</div>
+		</div>
+		<div class="paystate_content wrap">
+			<div class="bgColor clearfix" v-if="Whether==true">
+				<div class="fLeft">
+					<p>购电码</p>
+					<p>{{Single_typelist.recharge_code}}</p>
+				</div>
+				<div class="fRight">
+					<p>使用此号码直接在对应电表上进行充电即可</p>
+				</div>
+			</div>
+			<div class="bgColor clearfix" v-if="Whether==false">
+				<div class="fLeft">
+					<p>购电码</p>
+					<p>订单已关闭</p>
+				</div>
+			</div>
+			<table>
+				<thead>
+				<tr>
+					<th>类型</th><th>消费名称</th><th>实付金额</th><th>优惠</th><th>饭票</th><th>人民币</th><th>总额</th>
+				</tr>
+				</thead>
+				<tbody v-bind:class="Single_typelist">
+					<tr>
+						<td>
+							<span>{{Single_typelist.category}}</span>
+						</td>
+						<td>
+							<p>{{Single_typelist.type}}</p>
+							<p>订单号：<span>{{Single_typelist.sn}}</span></p>
+							<p>电表号：<span>{{Single_typelist.meter}}</span> </p>
+						</td>
+						<td>
+							{{Single_typelist.bank_pay}}
+						</td>
+						<td>{{Single_typelist.discounts}}</td>
+						<td>{{Single_typelist.red_packet_pay}}</td>
+						<td>{{Single_typelist.bank_pay}}</td>
+						<td class="activeColor">{{Single_typelist.amount}}</td>
+					</tr>
+					<tr><td colspan="7"><p>单位:元</p></td></tr>
+				</tbody>
+			</table>
+
+			<div class="paystate_info">
+				<p class="about">相关信息</p>
+				<ul v-bind:class="Relevant_informationlist">
+					<li>
+						<span>电表号：</span><span>{{Relevant_informationlist.meter}}</span>
+					</li>
+					<li>
+						<span>电表地址：</span><span>{{Relevant_informationlist.meter_address}}</span>
+					</li>
+					<li>
+						<span>签约人：</span><span>{{Relevant_informationlist.nickname}}</span>
+					</li>
+					<li class="time_report clearfix">
+						<span>时间报告：</span>
+						<span>
+						<p>创建时间 &nbsp;&nbsp;<em>{{Relevant_informationlist.create_time}}</em></p>
+						<p v-if="Whether">付款时间 &nbsp;&nbsp;<em>{{Relevant_informationlist.pay_time}}</em></p>
+					</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+	</div>
+	<div class="new_footer">
+		<ul class="new_case">
+			<li>深圳市彩之云网络科技有限公司</li>
+			<li>网站备案号：<a target="_blank" href="http://www.miitbeian.gov.cn">粤ICP备13038151号-2</a> &nbsp;&nbsp;&nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;&nbsp;经营许可证号：粤B2-20130390</li>
+		</ul>
+	</div>
+
+	
+
+<script>
+$(function() {
+    $( "#from" ).datepicker({
+      defaultDate: "+1w",
+      onClose: function( selectedDate ) {
+        $( "#to" ).datepicker("option", "minDate", selectedDate);
+      }
+     });//
+    $( "#to" ).datepicker({
+      defaultDate: "+1w",
+      onClose: function( selectedDate ) {
+        $( "#from" ).datepicker( "option", "maxDate", selectedDate);
+      	}
+    });
+ });
+
+// 初始化时间
+var date = new Date();
+var formatDate = function(date) { 
+    var y = date.getFullYear();  
+    var m = date.getMonth() + 1;  
+    m = m < 10 ? '0' + m : m;  
+    var d = date.getDate();  
+    d = d < 10 ? ('0' + d) : d;  
+    return y + '-' + m + '-' + d;  
+};  
+menubar.defaultDate = formatDate(date);
+</script>	
+</body>
+<script type="text/javascript" src="js/orderState.js"></script>
+</html>

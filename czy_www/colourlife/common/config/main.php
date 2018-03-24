@@ -1,0 +1,286 @@
+<?php
+
+/**
+ * Main configuration.
+ * All properties can be overridden in mode_<mode>.php files
+ */
+return array(
+
+	// Set yiiPath (relative to Environment.php)
+	'yiiPath' => dirname(__FILE__) . '/../../vendor/yiisoft/yii/framework/yii.php',
+	'yiicPath' => dirname(__FILE__) . '/../yiic.php',
+	'yiitPath' => dirname(__FILE__) . '/../../vendor/yiisoft/yii/framework/yiit.php',
+
+	// Set YII_DEBUG and YII_TRACE_LEVEL flags
+	'yiiDebug' => false,
+	'yiiTraceLevel' => 0,
+
+	// Static function Yii::setPathOfAlias()
+	'yiiSetPathOfAlias' => array(
+		// uncomment the following to define a path alias
+		//'local' => 'path/to/local-folder'
+		'root' => dirname(__FILE__) . '/../../',
+		'common' => dirname(__FILE__) . '/../',
+		'comcom' => dirname(__FILE__) . '/../components',
+		'comext' => dirname(__FILE__) . '/../extensions',
+		'excel_upload' => dirname(__FILE__) . '/../../uploads/excel/file',
+	),
+
+	// This is the main Web application configuration. Any writable
+	// CWebApplication properties can be configured here.
+	'configWeb' => array(
+
+		'timeZone' => 'Asia/Shanghai',
+		'language' => 'zh_cn',  // 必须为小写
+
+		// Preloading 'log' component
+		'preload' => array('log'),
+
+		// Autoloading model and component classes
+		'import' => array(
+			'common.models.*',
+			'common.components.*',
+			'common.components.behaviors.*',
+			'common.components.widgets.*',
+			'common.components.sso.*',
+			'common.components.micro.*',
+			'common.models.micro.*',
+		),
+
+		// Application components
+		'components' => array(
+			'coreMessages' => array(
+				'basePath' => dirname(__FILE__) . '/../messages',
+			),
+
+			'assetManager' => array(
+				// 设置存放assets的目录
+				'basePath' => dirname(__FILE__) . '/../../statics/assets',
+				// 设置访问assets目录的地址
+				'baseUrl' => 'http://' . STATICS_DOMAIN . '/assets',
+			),
+
+			'db' => array(
+				'class' => 'DbConnectionMan', //Specify it,instead of CDbConnection,other options is same as CDbConnection
+				'connectionString' => 'mysql:host=localhost;dbname=colourlife',
+				'emulatePrepare' => true,
+				'charset' => 'utf8',
+				'enableSlave' => true, //Read write splitting function is swithable.You can specify this value to false to disable it.
+				'enableProfiling' => true,
+				'enableParamLogging' => true,
+
+				'slaves' => array( //slave connection config is same as CDbConnection
+					'read1' => array(
+						'connectionString' => 'mysql:host=localhost;dbname=colourlife',
+						'charset' => 'utf8',
+					),
+				),
+			),
+
+			'chat' => array(
+				'class' => 'common.components.ChatComponent',
+				'db' => null,
+			),
+
+			// uncomment the following to enable URLs in path-format
+			'urlManager' => array(
+				'urlFormat' => 'path',
+				'showScriptName' => false,
+				//'useStrictParsing' => true,
+				'rules' => array(
+					'' => 'site/index',
+					'<_m:(gii)>' => '<_m>/default/index',
+					'<_m:(gii)>/<something:.+>' => '<_m>/<something>',
+					'<_m:(api)>/<something:.+>' => '<_m>/<something>',
+					'<_m:(wap)>/<something:.+>' => '<_m>/<something>',
+
+					//'<_m:(.*)>/<something:.+>' => '<_m>/<something>',
+					'<_m:(companyRoom|communityApply|company|api|wap|salesShop|sellerShop|supplierShop|repairShop|procurementShop|topic)>/<something:.+>' => '<_m>/<something>',
+
+					'<_c:\w+>' => '<_c>/index',
+					'<_c:\w+>/<id:\d+>' => '<_c>/view',
+					'<_c:\w+>/<_a:\w+\d*>/<id:.+>' => '<_c>/<_a>',
+					'<_c:\w+>/<_a:\w+>' => '<_c>/<_a>',
+				),
+			),
+
+			// Error handler
+			'errorHandler' => array(
+				// use 'site/error' action to display errors
+				'errorAction' => 'site/error',
+			),
+
+			'log' => array(
+				'class' => 'CLogRouter',
+				'routes' => array(
+
+					array(
+                    	'class' => 'CFileLogRoute',
+						'logPath' => dirname(__FILE__) . '/../../../log/czylog/colourlife/'.date('Y-m-d').'/',
+						'logFile' => 'default.log',
+						'levels' => 'warning,info,error',
+						'categories' => 'colourlife.logFile.*',
+			        ),
+
+					array(
+						'class' => 'CFileLogRoute',
+						'logPath' => dirname(__FILE__) . '/../../log/',
+						'logFile' => 'error.log',
+						'levels' => 'error',
+						'except' => 'exception.CHttpException.*, colourlife.*',
+					),
+					array(
+						'class' => 'CFileLogRoute',
+						'logPath' => dirname(__FILE__) . '/../../log/',
+						'logFile' => 'info.log',
+						'levels' => 'info',
+						'except' => 'colourlife.*',
+					),
+					array(
+						'class' => 'CFileLogRoute',
+						'logPath' => dirname(__FILE__) . '/../../log/',
+						'logFile' => 'warning.log',
+						'levels' => 'warning',
+						'except' => 'colourlife.*',
+					),
+					array(
+						'class' => 'CDbLogRoute',
+						'connectionID' => 'db',
+						'autoCreateLogTable' => false,
+						'logTableName' => 'core_log',
+						'levels' => 'info, error, warning',
+						'categories' => 'colourlife.core.*',
+					),
+				),
+			),
+
+			'cache' => array(
+				'class' => 'system.caching.CDummyCache',
+				'keyPrefix' => 'colourlife_',
+			),
+			'rediscache' => array(
+				'class' => 'CRedisCache',
+				'hostname' => '10.26.224.140',
+				'port' => 6379,
+				'database' => 0,
+				'hashKey' => false,
+				//'password' => '',
+				'keyPrefix' => 'CZY:colourlife:'
+			),
+
+			'format' => array(
+				'class' => 'common.components.Formatter',
+			),
+
+			'curl' => array(
+				'class' => 'common.extensions.Curl',
+				//'options' => array()
+			),
+
+			'imageFile' => array(
+				'class' => 'common.components.ImageFile',
+				'defaultImage' => 'http://' . STATICS_DOMAIN . '/common/images/nopic.png',
+				'basePath' => dirname(dirname(__FILE__) . '/../../../') . '/uploads/images/',
+				'baseUrl' => 'http://' . UPLOADS_DOMAIN . '/images/',
+			),
+
+			'ajaxUploadImage' => array(
+				'class' => 'common.components.AjaxUploadImage',
+				'defaultImage' => 'http://' . STATICS_DOMAIN . '/common/images/nopic.png',
+				'basePath' => dirname(dirname(__FILE__) . '/../../../') . '/uploads/images/',
+				'tempBasePath' => dirname(dirname(__FILE__) . '/../../../') . '/uploads/temp/',
+				'baseUrl' => 'http://' . UPLOADS_DOMAIN . '/images/',
+				'tempBaseUrl' => 'http://' . UPLOADS_DOMAIN . '/temp/',
+				'action' => 'site/ajaxUpload',//上传的action
+				'allowedExtensions' => array("jpg", "jpeg", "gif", "png"),//array("jpg","jpeg","gif","exe","mov" and etc...
+				'sizeLimit' => 2097152,// maximum file size in bytes 10*1024*1024
+			),
+
+			'geoMars' => array(
+				'class' => 'common.components.geo.mars.GeoMars',
+			),
+
+			'config' => array(
+				'class' => 'common.components.ConfigComponent',
+			),
+
+			'sms' => array(
+				'class' => 'common.components.SmsComponent',
+			),
+		),
+
+		// application-level parameters that can be accessed
+		// using Yii::app()->params['paramName']
+		'params' => array(// this is used in contact page
+			'curl_connect_time' => 100,//设置curl请求内容的超时时间，注意 0=永久
+			'curl_time_out' => 50,//设置curl连接的超时时间，注意 0=永久
+			'ios_push_deploy_status' => 1,//1=开发，2=产品
+
+			'SsoClass' => "SingleSignOn",    //单点登录的具体实现类。 测试类：SingleSignOnMock， 正式类： SingleSignOn
+
+			// 金融平台全国饭票参数
+			'fanance' => array(
+				'debug_customer_pano' => '9f22bdb6934141ecb7e5a4506958a51b',
+				'debug_customer_atid' => 2,
+				'production_customer_pano' => 'kxcv89z98qwsd9q3ldf9asld1sdfsg63',
+				'production_customer_atid' => 1,
+
+				'debug_employee_pano' => '91e823fb1da64d2581978c3bea59db51',
+				'debug_employee_atid' => 8,
+				'production_employee_pano' => 'h83v89z77hbsd9q3l5231slddrtmsg45',
+				'production_employee_atid' => 6,
+			)
+		),
+
+	),
+
+	// This is the Console application configuration. Any writable
+	// CConsoleApplication properties can be configured here.
+	// Leave array empty if not used.
+	// Use value 'inherit' to copy from generated configWeb.
+	'configConsole' => array(
+
+		'timeZone' => 'Asia/Shanghai',
+		'language' => 'zh_cn',  // 必须为小写
+
+		// Preloading 'log' component
+		'preload' => array('log'),
+
+		// Autoloading model and component classes
+		'import' => 'inherit',
+
+		// Application componentshome
+		'components' => array(
+
+			// Database
+			'db' => 'inherit',
+
+			// Chat
+			'chat' => 'inherit',
+
+			// Application Log
+			'log' => 'inherit',
+
+			// get from url
+			'curl' => 'inherit',
+			//自动处理的配置
+			'config' => 'inherit',
+			//缓存
+			'rediscache' => 'inherit',
+
+		),
+
+		'commandMap' => array(
+			'migrate' => array(
+				'class' => 'system.cli.commands.MigrateCommand',
+				'migrationPath' => 'application.migrations',
+				'migrationTable' => 'migration',
+				'connectionID' => 'db',
+				//'templateFile' => 'application.migrations.template',
+			),
+		),
+
+		'params' => 'inherit'
+	),
+
+);

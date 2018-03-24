@@ -1,0 +1,169 @@
+<?php
+/**
+ * 约惠中秋活动
+ * @author gongzhiling
+ *
+ */
+class JingDongCrazyController extends ActivityController{
+	public $beginTime='2016-09-30';//活动开始时间
+	public $endTime='2016-10-31 23:59:59';//活动结束时间
+	public $secret = 'pre&fere^nti*al';
+	public $layout = false;
+	public function filters()
+	{
+		return array(
+				'accessControl', // perform access control for CRUD operations
+				'Validity',
+				'signAuth',
+		);
+	}
+	
+	public function accessRules()
+	{
+		return array(
+				array('allow', // allow admin user to perform 'admin' and 'delete' actions
+						'actions' => array(),
+						'users' => array('@'),
+				),
+		);
+	}
+	// 缤纷盛夏欢乐购商品
+//	private $good_ids = array (
+//			5979,
+//			31768,
+//			28257,
+//			27131,
+//			32101,
+//			27075,
+//			12919,
+//			5087,
+//			27110,
+//			2486,
+//			21189,
+//			2491,
+//			28075,
+//			30954,
+//			28193,
+//			26631,
+//			26641,
+//			7277,
+//			27965,
+//			27961,
+//			27967
+//	);
+    //国庆
+    private $good_ids = array (
+			18683,
+			18603,
+			20437,
+			37079,
+			2546,
+			37080,
+			37081,
+			37076,
+			25372,
+			24092,
+			37082,
+			37083,
+			37084,
+			37085,
+			37086,
+			37087,
+			12940,
+			33258,
+			37078,
+			33150,
+			6662
+	);
+	//测试
+// 	private $good_ids = array (
+//			26974,
+//			26932,
+//			26931,
+//			26930,
+//			26929,
+//			26928,
+//			26927,
+//			26926,
+//			26925,
+//			26924,
+//			26923,
+//			26922,
+//			26921,
+//			26920,
+//			26919,
+//			20769,
+//			20768,
+//			20767,
+//			20766,
+//			20765,
+//			26918,
+//	); 
+	/**
+	 * 首页
+	 */
+	public function actionIndex(){
+		//获取所有商品
+		$cacheKey = md5 ( 'goodsList' );
+		$goodsList=$this->getGoodsList($cacheKey,$this->good_ids);
+		//获取京东url
+		$SetableSmallLoansModel = new SetableSmallLoans();
+		$jingdong = $SetableSmallLoansModel->searchByIdAndType('jd', '', $this->getUserId(),false);
+		$this->renderPartial("/v2016/jingdongCrazy/index",array('jd_url'=>$jingdong->completeURL,'goodsList'=>json_encode($goodsList)));
+	}
+	/**
+	 * 获取所有商品
+	 */
+	private  function getGoodsList($cacheKey,$goodsArr){
+		if (empty($goodsArr)){
+			return array();
+		}
+		$productList=array();
+		$productList=Yii::app ()->cache->get ( $cacheKey );
+		if (isset($_GET['pageCache'])&&$_GET['pageCache']=='false'){
+			$productList=array();
+		}
+		//Yii::app ()->cache->delete ( $cacheKey );
+		if (empty($productList)){
+			foreach ($goodsArr as $key=>$val){
+				$tmp=array();
+				$productArr=Goods::model()->findByPk($val);
+				if (empty($productArr)){
+					continue;
+				}
+				$tmp['id']= $val;
+				$tmp['name']=$productArr['name'];
+				if($productArr['ku_cun']<0){
+					$productArr['ku_cun']=0;
+				}
+				$tmp['ku_cun']=$productArr['ku_cun'];
+				$image_arr=explode(':', $productArr['good_image']);
+				if(count($image_arr)>1){
+					$tmp['img_name'] = $productArr['good_image'];
+				}else{
+					$tmp['img_name'] = F::getUploadsUrl("/images/" . $productArr['good_image']);
+				}
+				$tmp['price']=$productArr['customer_price'];
+				$productList[]=$tmp;
+			}
+			Yii::app ()->cache->set ( $cacheKey, $productList, 86400 );
+		}
+		return $productList;
+	}
+	
+	/*
+	 * @version 通过产品id获取产品信息
+	* @param int goods_id
+	* return array
+	*/
+	private function getProductDetail($goods_id){
+		if(empty($goods_id)){
+			return false;
+		}
+		$productArr=Goods::model()->findByPk($goods_id);
+		return $productArr;
+	}
+	
+	
+}
+

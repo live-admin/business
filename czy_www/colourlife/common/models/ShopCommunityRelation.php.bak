@@ -1,0 +1,195 @@
+<?php
+
+/**
+ * This is the model class for table "shop_community_relation".
+ *
+ * The followings are the available columns in table 'shop_community_relation':
+ * @property integer $shop_id
+ * @property integer $community_id
+ * @property integer $update_time
+ */
+class ShopCommunityRelation extends BaseActiveRecord
+{
+    /**
+     * Returns the static model of the specified AR class.
+     * @param string $className active record class name.
+     * @return ShopCommunityRelation the static model class
+     */
+    public static function model($className = __CLASS__)
+    {
+        return parent::model($className);
+    }
+
+    /**
+     * @return string the associated database table name
+     */
+    public function tableName()
+    {
+        return 'shop_community_relation';
+    }
+
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules()
+    {
+        return array(
+            array('shop_id, community_id', 'required'),
+            array('shop_id, community_id, update_time', 'numerical', 'integerOnly' => true),
+            array(' shop_id, community_id', 'safe', 'on' => 'search'),
+        );
+    }
+
+    public function primaryKey()
+    {
+        return array('shop_id', 'community_id');
+    }
+
+    /**
+     * @return array relational rules.
+     */
+    public function relations()
+    {
+        return array(
+            'shop' => array(self::BELONGS_TO, 'Shop', 'shop_id'),
+            'community' => array(self::BELONGS_TO, 'Community', 'community_id'),
+        );
+    }
+
+    /**
+     * @return array customized attribute labels (name=>label)
+     */
+    public function attributeLabels()
+    {
+        return array(
+            'shop_id' => '商家',
+            'community_id' => '小区',
+            'update_time' => '更新时间',
+        );
+    }
+
+    /**
+     * Retrieves a list of models based on the current search/filter conditions.
+     * @return ActiveDataProvider the data provider that can return the models based on the search/filter conditions.
+     */
+    public function search()
+    {
+        $criteria = new CDbCriteria;
+
+        $criteria->compare('shop_id', $this->shop_id);
+
+        return new ActiveDataProvider($this, array(
+            'criteria' => $criteria,
+        ));
+    }
+
+    /**
+     * 自动处理
+     */
+    public function behaviors()
+    {
+        return array(
+            'CTimestampBehavior' => array(
+                'class' => 'zii.behaviors.CTimestampBehavior',
+                'createAttribute' => NULL,
+                'updateAttribute' => 'update_time',
+                'setUpdateOnCreate' => true,
+            ),
+        );
+    }
+
+    public function getStatusName($html = false)
+    {
+        $return = '';
+        if ($html) {
+            $return = '<span class="label label-success">已服务';
+        } else {
+            $return .= '<span class="label label-error">未服务</span>';
+
+        }
+        return $return;
+    }
+
+    public function getStatusNames($select = false)
+    {
+        $return = array();
+        if ($select) {
+            $return[''] = '全部';
+        }
+        $return[Item::SHOP_COMMUNITY_STATUS_NO] = '未服务';
+        $return[Item::SHOP_COMMUNITY_STATUS_OK] = '已服务';
+        return $return;
+    }
+
+    public function getShopName()
+    {
+        return empty($this->shop) ? '' : $this->shop->name;
+    }
+
+    public function getShopLogoImgUrl()
+    {
+        return empty($this->shop) ? '' : $this->shop->logoImgUrl;
+    }
+
+    public function getShopDomain()
+    {
+        return empty($this->shop) ? '' : $this->shop->domain;
+    }
+
+    public function getShopScore()
+    {
+        return empty($this->shop) ? 0 : $this->shop->score;
+    }
+
+    public function getShopUrl($path = '')
+    {
+        return empty($this->shop) ? '' : 'http://' . strtolower($this->shop->domain) . SHOP_DOMAIN . $path;
+    }
+
+    public function getShopDescHtml()
+    {
+        return empty($this->shop) ? 0 : $this->shop->desc_html;
+    }
+
+    public function getShopDetailImgUrl()
+    {
+        return empty($this->shop) ? '' : $this->shop->detailImgUrl;
+    }
+
+    public function  updateCommunityRelation($id, $communityList)
+    {
+        //删除所有的相关记录
+        $this->deleteAllByAttributes(array('shop_id' => $id));
+        return $this->saveAll($id, $communityList);
+
+    }
+
+    public function saveAll($shopId, $communityIds = array())
+    {
+        $myCommunityIds = array();
+        if (empty($communityIds)) //如果传入的小区为空。则不需要添加关联记录。直接返回成功
+            return true;
+
+        //获得该组织架构下的所有小区
+        $shop = Shop::model()->findByPk($shopId);
+        if (!empty($shop->branch)) {
+            $myCommunityIds = $shop->branch->getBranchAllIds("Community");
+        }
+
+        foreach ($communityIds as $key => $val) {
+            //如果要插入的小区ID不属于该组织架构直接跳过
+            if (!in_array($val, $myCommunityIds)) {
+                continue;
+            }
+            //保存关连关系
+            $model = new self;
+            $model->community_id = intval($val);
+            $model->shop_id = intval($shopId);
+
+            if (!$model->save())
+                return false;
+        }
+        return true;
+    }
+
+}

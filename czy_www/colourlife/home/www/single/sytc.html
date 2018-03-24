@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="description" content="">
+	    <meta name="keywords" content="">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<title>系统通知</title>
+	    <meta name="renderer" content="webkit">
+	    <meta http-equiv="Cache-Control" content="no-siteapp">
+	    <meta name="mobile-web-app-capable" content="yes">
+	    <meta name="apple-mobile-web-app-capable" content="yes">
+	    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+	    <meta name="format-detection" content="telephone=no">
+	    <script type="text/javascript" src="https://cc-czytest.colourlife.com/activity/v2017/sytc/js/flexible.js" ></script>
+	    <script type="text/javascript" src="https://cc-czytest.colourlife.com/activity/v2017/sytc/js/jquery-1.11.3.js"></script>
+	    <link rel="stylesheet" href="https://cc-czytest.colourlife.com/activity/v2017/sytc/css/layout.css" />
+	    <link rel="stylesheet" href="https://cc-czytest.colourlife.com/activity/v2017/sytc/css/normalize.css">
+	</head>
+	<body>
+		<div class="mask"></div>
+		<div class="pop">
+			<img src="https://cc-czytest.colourlife.com/activity/v2017/sytc/images/dele.png"/>
+				<div class="pop_txt">
+					<p>温馨提示</p>
+				</div>
+			<div class="pop_bottom">
+				<p>尊敬的用户：</p>
+				<p>为提升彩之云使用体验，我们将在<span>5月21日凌晨0：00</span> - <span>02：00</span>进行系统升级。期间彩之云相关业务可能会受影响，对给您带来的不便深表歉意，敬请谅解！</p>
+				<p>彩生活研究院</p>
+				<p>2017年5月20日</p>
+				
+			</div>
+		</div>
+		<script type="text/javascript">
+		
+			$(document).ready(function(){
+				$(".pop img").click(function(){
+					mobileCommand("closeBrowser");
+				});
+				
+				function mobileCommand(cmd){
+					if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)) {
+						var _cmd = "http://colourlifecommand/" + cmd;
+						document.location = _cmd;
+					} else if (/(Android)/i.test(navigator.userAgent)) {
+						var _cmd = "jsObject." + cmd + "();";
+						eval(_cmd);
+					} else {
+		
+					}
+				}
+			});
+			
+		</script>
+		
+		
+	</body>
+</html>

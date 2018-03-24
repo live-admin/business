@@ -1,0 +1,314 @@
+.paystate_state{
+	width:100%;
+	background-color:#f2f3f4;
+}
+.wrap{
+	width:1100px;
+	margin:0 auto;
+}
+.stateshow h3{
+	height:90px;
+	line-height: 90px;
+	padding-left:40px;
+	color:#373d41;
+	font-size: 22px;
+	font-weight: normal;
+	border-bottom: 1px solid #ccc;
+}
+.stateshow .showpng{
+	text-align: center;
+}
+.showpng img{
+	width:100px;
+	height:100px;
+	margin: 30px auto 20px;
+}
+.showpng p{
+	padding-bottom: 50px;
+	font-size: 22px;
+	color:#00aaee;
+}
+.paystate_content{
+	margin-top:40px;
+}
+.paystate_content .bgColor{
+	background-color: #f2f3f4;
+/*	height:106px;*/
+}
+.fLeft{
+	float:left;
+}
+.fRight{
+	float:right;
+}
+.paystate_content .fLeft{
+	margin-left:40px;
+}
+.paystate_content .fRight{
+	margin-right:40px;
+}
+.paystate_content .fLeft p{
+	color:#2d3e50;
+}
+.paystate_content .fLeft p:nth-child(1){
+	font-size: 14px;
+	margin-top:25px;
+}
+.paystate_content .fLeft p:nth-child(2){
+	font-size: 22px;
+	margin-top:10px;
+	margin-bottom: 30px;
+}
+.paystate_content .fRight p{
+	font-size: 12px;
+	margin-top:25px;
+	color:#a3aaae;
+}
+.paystate_content table{
+	width:1100px;
+	margin:0 auto;
+	color:#000
+}
+.paystate_content table tr td{
+	text-align: center;
+	font-size: 14px;
+	color:#2d3e50;
+	height:130px;
+}
+.paystate_content table tbody tr td{
+	font-size: 20px;
+}
+.paystate_content table tr td:nth-child(1){
+	font-size: 14px;
+}
+.paystate_content table tr td:nth-child(1) span{
+	font-size: 14px;
+	display: inline-block;
+	width:50px;
+	height: 50px;
+	line-height:50px;
+	background: #53cfee;
+	color:#fff;
+	border-radius:25px;
+	text-align: center;
+}
+.paystate_content table tr td:nth-child(1),
+.paystate_content table tr td:nth-child(4),
+.paystate_content table tr td:nth-child(5),
+.paystate_content table tr td:nth-child(6)
+{
+	width:120px;
+}
+.paystate_content table tr td:nth-child(2){
+	width:230px;
+	font-size: 12px;
+}
+.paystate_content table tr td:nth-child(2) p{
+	margin-bottom: 10px;
+}
+.paystate_content table tr td:nth-child(3){
+	width:150px;
+}
+.paystate_content table tr td:nth-child(7){
+	width:220px;
+}
+.paystate_content table thead tr{
+	height:86px;
+	line-height: 86px;
+	font-weight: normal;
+	border-bottom: 1px solid #d4d5d6;
+	font-size: 14px;
+	color:#2d3e50;
+}
+.paystate_content table tbody tr{
+	border-bottom: 1px solid #d4d5d6;
+}
+.paystate_content table tbody tr:last-child{
+	border-bottom:0;
+}
+.paystate_content table tbody tr:last-child td{
+	height:100px;
+	text-align: right;
+	font-size:14px;
+	color:#a3aaae;
+}
+.paystate_content table tbody tr:last-child td p{
+	margin-right:30px;
+}
+.paystate_info{
+	font-size: 14px;
+	border-bottom: 1px solid #e6e9ea;
+	margin-bottom: 60px;
+	color:#333b46;
+}
+.paystate_info .about{
+	height:50px;
+	line-height: 50px;
+	background-color: #f2f3f4;
+	padding-left:35px;
+}
+.paystate_info ul{
+	padding-left:35px;
+	font-size: 12px;
+}
+.paystate_info ul li{
+	margin:15px 0;
+}
+.paystate_info ul li span:nth-child(1){
+	width:100px;
+	display: inline-block;
+}
+.paystate_info .time_report span{
+	float: left;
+}
+.paystate_info .time_report span p{
+	margin-bottom: 10px;
+}
+.paystate_info .time_report em{
+	font-style: normal;
+}
+.activeColor{
+	color:#ff6f36 !important;
+	font-style:16px;
+}
+
+/*未付款状态*/
+.hide{
+	display: none;
+}
+.order_detail{
+	padding-left:40px;
+	padding:35px 0  35px 40px;
+	position: relative;
+	top:0;
+	left:0;
+}
+.order_detail div{
+	height:50px;
+	/*margin-bottom: 25px;*/
+}
+#buy_hovers{
+}
+.order_detail div span:nth-child(1){
+	width:60px;
+	display: inline-block;
+}
+.goPay{
+	color:#00aaee;
+}
+.goPay i{
+	display: inline-block;
+	width:13px;
+	height:9px;
+	background: url(../img/arrow.png) no-repeat;
+	margin-left:15px;
+}
+.order_detail ul{
+	width:100px;
+	position: absolute;
+	top:80px;
+	left:90px;
+	border-radius: 8px;
+	background-color: #fff;
+}
+.order_detail ul li{
+	height:35px;
+	line-height: 35px;
+	text-align: center;
+	font-size: 12px;
+	color:#2d3e50;
+	cursor: pointer;
+}
+.order_detail ul li.activeChoose{
+	background-color:#00aaee;
+	color:#fff;
+}
+.myorder_btn{
+	width:180px;
+	height:40px;
+	line-height: 40px;
+	font-size: 16px;
+	display: block;
+	margin:0 auto;
+	background-color:#4facf4;
+	color:#fff;
+	border-radius: 8px;
+}
+.marBottom{
+	padding-bottom: 50px;
+}
+.buyElectNum{
+	padding:25px 0;
+}
+.buyElectNum p{
+	text-align: center;
+}
+.buyElectNum p:nth-child(1){
+	color:#2d3e50;
+	font-size: 14px;
+}
+.buyElectNum p:nth-child(2){
+	color:#ff8236;
+	font-size: 24px;
+	margin:10px 0;
+}
+.buyElectNum p:nth-child(3){
+	color:#bfc7cc;
+	font-size: 14px;
+}
+.payok p{
+	color:#70c84b;
+	}
+#fail_font{
+	color:#FE6262;
+}
+#fail_Order{
+	text-align:center ;
+	font-size: 14px;
+	color: #000;
+}
+#fail_list{
+	overflow: hidden;
+	height: auto;
+	width:30%;
+	margin:0 auto;
+}
+#fail_list li{
+	display:block;
+	float: left;
+	margin:0 6.8%;
+    color:#00aaee;
+	cursor:pointer;
+	font-size:16px;
+}
+/*交易关闭*/
+#buy_close{
+	color:#FF6F36;
+}
+.goPay_list{
+	/*display: none;*/
+}
+.goPay_list i{
+	display: inline-block;
+	width:13px;
+	height:9px;
+	background: url(../img/arrow.png) no-repeat;
+	margin-left:11px;
+}
+.goPay_list li:nth-child(2){
+	display:none;
+}
+.order_detail ul li.activeChoose{
+	color:#00AAEE;
+	background:#F2F3F4;
+	font-size:16px;
+}
+.goPay_list li:hover{
+	background-color:#00aaee;
+	color:#fff;
+}
+/*<div class="buyElectNum">
+			<p>购电码</p>
+			<p>34562548934456546224</p>
+			<p>使用此号码直接在对应电表上进行充电即可</p>
+		</div>*/

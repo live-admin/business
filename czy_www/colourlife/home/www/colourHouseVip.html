@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>彩住宅业主专享卡</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telphone=no" />
+	<!--<script type="text/javascript" src="http://cc-czytest.colourlife.com/activity/v2017/colourHouseVip/js/flexible.js" ></script>
+    <script type="text/javascript" src="http://cc-czytest.colourlife.com/activity/v2017/colourHouseVip/js/jquery-1.11.3.js"></script>
+	<script type="text/javascript" src="http://cc-czytest.colourlife.com/activity/v2017/colourHouseVip/js/JQuery.md5.js"></script>
+	<script type="text/javascript" src="http://cc-czytest.colourlife.com/activity/v2017/colourHouseVip/js/vue.js"></script>
+	<script type="text/javascript" src="http://cc-czytest.colourlife.com/activity/v2017/colourHouseVip/js/userinfo.js"></script>
+    <link rel="stylesheet" href="http://cc-czytest.colourlife.com/activity/v2017/colourHouseVip/css/normalize.css" />
+    <link rel="stylesheet" href="http://cc-czytest.colourlife.com/activity/v2017/colourHouseVip/css/layout.css" />-->
+    
+    <script type="text/javascript" src="http://cc.colourlife.com/activity/v2017/colourHouseVip/js/flexible.js" ></script>
+    <script type="text/javascript" src="http://cc.colourlife.com/activity/v2017/colourHouseVip/js/jquery-1.11.3.js"></script>
+    <script type="text/javascript" src="http://cc.colourlife.com/activity/v2017/colourHouseVip/js/JQuery.md5.js"></script>
+	<script type="text/javascript" src="http://cc.colourlife.com/activity/v2017/colourHouseVip/js/vue.js"></script>
+	<script type="text/javascript" src="http://cc.colourlife.com/activity/v2017/colourHouseVip/js/userinfo.js"></script>	
+    <link rel="stylesheet" href="http://cc.colourlife.com/activity/v2017/colourHouseVip/css/normalize.css" />
+    <link rel="stylesheet" href="http://cc.colourlife.com/activity/v2017/colourHouseVip/css/layout.css" />
+</head>
+<style type="text/css">
+	[v-cloak]{
+		display:none ;
+	}
+</style>
+<body>
+<div v-cloak id="colourlifeHouseVip">
+	<!--彩住宅介绍 -->
+	<div class="introduce">
+		<h1>{{ msg1.title }}</h1>
+		<p>{{ msg1.introduce }}</p>
+		<div class="video"> 
+            <a href="http://video.sina.com.cn/view/250939441.html" target="_blank">
+            	<img src="https://cc.colourlife.com/activity/v2017/colourHouseVip/images/reload_video.jpg" alt="">
+            	<!--<img src="https://cc-czytest.colourlife.com/activity/v2017/colourHouseVip/images/reload_video.jpg" alt="">-->
+            </a>	
+		</div>
+		<p class="suggest">建议在Wifi环境下观看哦！~~</p>
+		
+	</div>
+	<!--彩住宅介绍 -->
+
+	<!--饭票商品推荐  -->
+	<div  v-cloak class="recommend_goods">
+		<h1>{{ msg2.title }}</h1>
+		<ul>
+			<li v-for="todo in msg2.arr">
+				<a href="{{ todo.url }}">
+					<img v-bind:src="todo.img">
+					<p>{{ todo.introduce }}</p>
+				</a>
+			</li>
+		</ul>
+	</div>
+	<!--饭票商品推荐  -->
+
+	<!-- 推荐楼盘 -->
+	<div v-cloak class="recommend_houses">
+		<h1>{{ msg3.title }}</h1>
+		<ul>
+			<li v-for="todo in msg3.arr">
+				<a href="{{ todo.url }}">
+					<div class="pic_show">
+						<img v-bind:src="todo.img" alt="">
+						<p>{{ todo.label }}</p>
+					</div>
+					<div class="describe">
+						<p>{{ todo.name }}</p>
+						<p>{{ todo.address }}</p>
+						<p>{{ todo.info }}</p>
+					</div>
+				</a>
+			</li>
+		</ul>	
+	</div>
+	<!-- 推荐楼盘 -->
+
+	<!-- 推荐购房奖励 -->
+	<div v-cloak class="award">
+		<h1>{{ msg4.title }}</h1>
+		<p>{{ msg4.introduce }}</p>
+		<div class="award_stander">
+			<table>
+				<thead>
+					<tr><td>项目名称</td><td>奖励起始时间</td><td>奖励标准</td></tr>
+				</thead>
+				<tbody>
+					<tr v-for="todo in msg4.arr"><td><span>{{ todo.itemName }}</span></td><td>{{ todo.startTime }}</td><td>{{ todo.awardStander }}</td></tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="contacts">
+			<p>郑先生:<a href="tel:13316483607 ">13316483607</a></p>
+			<p>陈女士:<a href="tel:13826416484 ">13826416484</a></p>
+		</div>
+	</div>
+	<!-- 推荐购房奖励 -->
+	
+</div>
+</body>
+</html>

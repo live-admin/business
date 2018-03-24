@@ -1,0 +1,29 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: chenql
+ * Date: 2015/12/29
+ * Time: 16:49
+ */
+class TestController extends Controller{
+
+    public function actionIndex(){
+
+        $homeConfigAd = HomeConfigAd::model();
+        $result = $homeConfigAd->updateByPk(array(4,221),array('state'=>1));
+        dump($result);
+//        $path = "D:\wamp\www\newcolourlife\home\controllers\TestController.php";
+//        echo basename($path)."<br>";
+//        echo basename($path,".php");
+
+//
+//        $dir = opendir("D:/wamp/www/newcolourlife/home/controllers");
+//
+//        //列出 images 目录中的文件
+//        while (($file = readdir($dir)) !== false)
+//        {
+//            echo "filename: " . $file . "<br />";
+//        }
+//        closedir($dir);
+    }
+}

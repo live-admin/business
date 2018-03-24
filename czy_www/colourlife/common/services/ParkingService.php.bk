@@ -1,0 +1,805 @@
+<?php
+/**
+ * 停车服务类
+ * User: Joy
+ * Date: 2015/11/3
+ * Time: 19:12
+ */
+Yii::import('common.services.BaseService');
+class ParkingService extends BaseService {
+
+    /**
+     * 获取月卡停车收费标准
+     * @param $communityId
+     * @param $carNumber
+     * @return array
+     * @throws CException
+     * @throws CHttpException
+     */
+    public function getMonthCategory($communityId, $carNumber)
+    {
+        $parkingTypes = array();
+        $feeCategory = Item::PARKING_TYPE_COLOURLIFE;
+        $thirdFees = '';
+
+        $configModel = ParkingMonthConfig::model()->find('community_id=:id', array(':id'=>$communityId));
+        if ( ! $configModel) {
+            $parkingTypes = $this->defaultMonthCategory($communityId);
+        }
+        else {
+            if (Item::PARKING_TYPE_GEMEITE === intval($configModel->third_type)) {
+                Yii::import('common.api.GemeiteApi');
+                $parkingFees = GemeiteApi::getInstance()->feeQuery($carNumber, $configModel->third_park_id);
+                if ( empty($parkingFees) )
+                    throw new CHttpException(400, "不是缴费停车场月卡用户");
+
+                $feeCategory = Item::PARKING_TYPE_GEMEITE;
+                $parkingTypes = $parkingFees['fee_unit_list'];
+                $thirdFees = json_encode(array('comm_id' => $parkingFees['comm_id'], 'time_start' => $parkingFees['time_start']));
+            }
+            elseif (Item::PARKING_TYPE_AIKE === intval($configModel->third_type)) {
+                Yii::import('common.api.AikeApi');
+                $parkingFees = AikeApi::getInstance()->getMonthCardInfo($carNumber, $configModel->third_park_id);
+                if ( empty($parkingFees)
+                    || ! isset($parkingFees['data'])
+                    || empty($parkingFees['data'])
+                    || ! is_array($parkingFees['data'])
+                )
+                    throw new CHttpException(400, "不是缴费停车场月卡用户");
+
+                foreach ($parkingFees['data'] as $key=>$fees) {
+                    $parkingTypes[$key] = array(
+                        'id' => $key,
+                        'name' => '月',
+                        'fees' => $fees['chargeStandard'],
+                        'unit_name' => '个月',
+                        'unit' => array(1,2,3,4,6,12)
+                    );
+                }
+
+                $feeCategory = Item::PARKING_TYPE_AIKE;
+                $thirdFees = json_encode($parkingFees);
+            }
+            elseif (Item::PARKING_TYPE_HANWANG === intval($configModel->third_type)) {
+                Yii::import('common.api.HanwangApi');
+                $parkingFees = HanwangApi::getInstance()->getCarByPlate($carNumber, $configModel->third_park_id);
+                if ( empty($parkingFees)
+                    || ! isset($parkingFees['list'])
+                    || empty($parkingFees['list'])
+                    || ! is_array($parkingFees['list'])
+                )
+                    throw new CHttpException(400, "不是缴费停车场月卡用户");
+
+                foreach ($parkingFees['list'] as $key=>$fees) {
+                    $parkingTypes[$key] = array(
+                        'id' => $key,
+                        'name' => '月',
+                        'fees' => $fees['price'],
+                        'unit_name' => '个月',
+                        'unit' => array(1,2,3,4,6,12)
+                    );
+                }
+
+                $feeCategory = Item::PARKING_TYPE_HANWANG;
+                $thirdFees = json_encode($parkingFees);
+            }
+            else {
+                $parkingTypes = $this->defaultMonthCategory($communityId);
+            }
+        }
+        return array(
+            'feeCategory' => $feeCategory,
+            'parkingTypes' => $parkingTypes,
+            'thirdFees' =>  $thirdFees
+        );
+    }
+
+    /**
+     * 默认缴费类型
+     * @param $communityId
+     * @return array
+     */
+    private function defaultMonthCategory($communityId)
+    {
+        $parkingTypes = array();
+
+        $criteria = new CDbCriteria;
+        $criteria->compare('community_id', $communityId);
+        $criteria->compare("state",0);
+        $criteria->compare('display',0);
+
+        $list = ParkingFeesType::model()->findAll($criteria);
+        if ($list) {
+            foreach ($list as $row) {
+                $parkingTypes[] = array(
+                    'id' => $row->id,
+                    'name' => $row->name,
+                    'fees' => $row->fees,
+                    'unit_name' => '个月',
+                    'unit' => array(1,2,3,4,6,12)
+                );
+            }
+        }
+        else {
+            return $this->sendErrorMessage(false, 0, '不是缴费停车场月卡用户', '不是缴费停车场月卡用户');
+        }
+
+        return $parkingTypes;
+    }
+
+    /**
+     * 生成订单停车信息数据
+     * @param $carNumber
+     * @param $parkingType
+     * @param $feeUnitId
+     * @param $feeNumber
+     * @param $thirdFees
+     * @param $orderSn
+     * @return array
+     * @throws CException
+     */
+    public function makeParkingData($carNumber, $parkingType, $feeUnitId, $feeNumber, $thirdFees, $orderSn)
+    {
+        $parkingData = array();
+
+        $parkingData['fee_unit_id'] = $feeUnitId;
+        $parkingData['car_number'] = $carNumber;
+        $parkingData['third_park_type'] = $parkingType;
+
+        if (Item::PARKING_TYPE_COLOURLIFE === $parkingType)
+            return $parkingData;
+
+        $thirdFees = json_decode($thirdFees, true);
+
+        if (Item::PARKING_TYPE_GEMEITE === $parkingType) {
+            Yii::import('common.api.GemeiteApi');
+            $result = GemeiteApi::getInstance()->orderQuery($orderSn, $thirdFees['comm_id'], $carNumber, $feeUnitId, $feeNumber, $thirdFees['time_start']);
+            if (false === $result)
+                return $this->sendErrorMessage(false, 0, '请求格美特订单返回失败', '请求格美特订单返回失败');
+
+            $parkingData['third_park_type'] = Item::PARKING_TYPE_GEMEITE;
+
+            $fee_unit = explode('/', $result['data']['fee_unit']);
+            $parkingData['fee_unit_id'] = $fee_unit[0];
+            $parkingData['fee_unit'] = sprintf('%.2f', $fee_unit[1] / 100) . '/' . $fee_unit['2'];
+
+            $parkingData['fee_number'] = $result['data']['fee_number'];
+            $parkingData['third_park_id'] = $thirdFees['comm_id'];
+            $parkingData['third_order_id'] = $result['data']['out_trade_no'];
+            $parkingData['out_result'] = json_encode($result['data']);
+
+            return $parkingData;
+        }
+        elseif (Item::PARKING_TYPE_AIKE === $parkingType) {
+            $parkingData['third_park_type'] = Item::PARKING_TYPE_AIKE;
+
+            $feesUnit = $thirdFees['data'][$feeUnitId];
+
+            $parkingData['fee_number'] = $feeNumber;
+            $parkingData['fee_unit'] = $feesUnit['chargeStandard'] . '/月';
+
+            $parkingData['third_park_id'] = $thirdFees['parkCode'];
+            $parkingData['third_order_id'] = '';
+            $parkingData['out_result'] = json_encode($thirdFees);
+
+            return $parkingData;
+        }
+        elseif (Item::PARKING_TYPE_HANWANG === $parkingType) {
+            Yii::import('common.api.HanwangApi');
+            $result = HanwangApi::getInstance()->calculateCarDelay($carNumber, $thirdFees['list'][$feeUnitId]['parkID'], $feeNumber);
+            if (false === $result)
+                return $this->sendErrorMessage(false, 0, '请求汉王订单返回失败', '请求汉王订单返回失败');
+
+            $parkingData['third_park_type'] = Item::PARKING_TYPE_HANWANG;
+
+            $parkingData['fee_number'] = $feeNumber;
+            $parkingData['fee_unit'] = $thirdFees['list'][$feeUnitId]['price'] . '/月';
+
+            $parkingData['third_park_id'] = $thirdFees['list'][$feeUnitId]['parkID'];
+            $parkingData['third_order_id'] = '';
+            $parkingData['out_result'] = json_encode($result);
+
+            return $parkingData;
+        }
+
+        return $this->sendErrorMessage(false, 0, '请求停车信息失败', '请求停车信息失败');
+    }
+
+    /**
+     * 更新订单状态为 交易成功
+     * @param OthersFees $otherFeeModel
+     * @return bool
+     * @throws CException
+     */
+    public function monthTransactionSuccess(OthersFees $otherFeeModel)
+    {
+        if ($otherFeeModel->status != Item::FEES_TRANSACTION_ERROR)
+            return $this->sendErrorMessage(false, 0, '订单状态不可续卡', '订单状态不可续卡');
+
+        $parkingFees = ParkingFeesMonth::model()->findByPk($otherFeeModel->object_id);
+        if ( ! $parkingFees)
+            return $this->sendErrorMessage(false, 0, '停车信息错误', '停车信息错误');
+
+        // 格美特
+        if (intval($parkingFees->third_park_type) === Item::PARKING_TYPE_GEMEITE) {
+            Yii::import('common.api.GemeiteApi');
+            $out_result = json_decode($parkingFees->out_result, true);
+            $result = GemeiteApi::getInstance()->notify(
+                $otherFeeModel->sn,
+                $parkingFees->third_park_id,
+                $parkingFees->car_number,
+                $parkingFees->fee_unit_id,
+                $parkingFees->fee_number,
+                $out_result['time_start'],
+                $parkingFees->third_order_id,
+                $otherFeeModel->pay_time
+            );
+
+            if ($result && 'success' === strtolower($result['data']['retmsg'])) {
+                $otherFeeModel->status = Item::FEES_TRANSACTION_SUCCESS;
+            }
+        }
+        // 艾科
+        elseif (intval($parkingFees->third_park_type) === Item::PARKING_TYPE_AIKE) {
+            Yii::import('common.api.AikeApi');
+            $fee_unit_array = explode('/', $parkingFees->fee_unit);
+            $result = AikeApi::getInstance()->renewMonthCard(
+                $parkingFees->third_park_id,
+                $parkingFees->car_number,
+                date('Y-m-d H:i:s', $otherFeeModel->pay_time),
+                $parkingFees->fee_number,
+                $otherFeeModel->amount,
+                $fee_unit_array[0],
+                date('Y-m-d H:i:s')
+            );
+
+            if (false !== $result) {
+                $otherFeeModel->status = Item::FEES_TRANSACTION_SUCCESS;
+            }
+        }
+        // 汉王
+        elseif (intval($parkingFees->third_park_type) === Item::PARKING_TYPE_HANWANG) {
+            Yii::import('common.api.HanwangApi');
+            $result = HanwangApi::getInstance()->carDelay(
+                $parkingFees->car_number,
+                $parkingFees->third_park_id,
+                $parkingFees->fee_number,
+                $otherFeeModel->amount,
+                $otherFeeModel->sn
+            );
+
+            if (false !== $result) {
+                $otherFeeModel->status = Item::FEES_TRANSACTION_SUCCESS;
+            }
+        }
+
+        # 通知专业公司
+
+        $parkingMonthConfig = ParkingMonthConfig::model()->find('third_park_id=:park_id', array(':park_id' => $parkingFees->third_park_id));
+        $parkName = isset($parkingMonthConfig->third_park_name) ? $parkingMonthConfig->third_park_name : '';
+        $customer = Customer::model()->findByPk($otherFeeModel->customer_id);
+
+        $params = array(
+            'sn' => $otherFeeModel->sn,
+            'car_number' => $parkingFees->car_number,
+            'third_park_type' => $parkingFees->third_park_type,
+            'park_name' => $parkName,
+            'parking_fees_type' => 1,
+            'pay_time' => $otherFeeModel->pay_time,
+            'amount' => $otherFeeModel->amount,
+            'notify_status' => ($otherFeeModel->status == Item::FEES_TRANSACTION_SUCCESS) ? 1 : 0,
+            'username' => $customer->name,
+            'mobile' => $customer->mobile,
+            'fee_unit' => $parkingFees->fee_unit,
+            'fee_number' => $parkingFees->fee_number,
+            'enter_time' => '',
+            'park_time' => '',
+            'source' => $otherFeeModel->source ? $otherFeeModel->source : 'CZY'
+        );
+
+        $this->notifyService($params);
+
+        # 通知专业公司 end
+
+        $parkingFees->notify_times += 1;
+        $parkingFees->notify_date = time();
+        if ( !$otherFeeModel->save() )
+            return $this->sendErrorMessage(false, 0, '通知成功，更新订单交易状态失败', json_encode($otherFeeModel->getErrors()));
+        if ( !$parkingFees->save() )
+            return $this->sendErrorMessage(false, 0, '通知成功，更新订单通知状态失败', json_encode($parkingFees->getErrors()));
+
+        return true;
+    }
+
+
+    /**
+     * 根据坐标获取附近停车场
+     * @param $lat 纬度
+     * @param $lng 经度
+     * @return array
+     */
+    public function getParkingList($lat, $lng)
+    {
+        if (empty($lat) || empty($lng))
+            return $this->sendErrorMessage(false, 0, '', '请求汉王订单返回失败');
+
+        $parkingList = array();
+        $list = ParkingLot::model()->getParkingList($lat, $lng);
+        if ($list && count($list)) {
+            foreach ($list as $row) {
+                $parkingList[] = array(
+                    'parkId' => $row['id'],
+                    'parkName' => $row['name'],
+                    'parkAddress' => $row['address']
+                );
+            }
+        }
+
+        return $parkingList;
+    }
+
+    /**
+     * 查询临时停车缴费信息
+     * @param $carNumber
+     * @param $parkId
+     * @return array
+     * @throws CException
+     */
+    public function visitorParkingFees($carNumber, $parkId)
+    {
+        $parkInfo = ParkingLot::model()->findByPk($parkId);
+        if ( ! $parkInfo)
+            return $this->sendErrorMessage(false, 0, '选择的停车场不存在', '选择的停车场不存在');
+
+
+        //$parkingFees = array();
+        if ( Item::PARKING_TYPE_GEMEITE === intval($parkInfo->third_type)) {
+            Yii::import('common.api.GemeiteApi');
+            $result = GemeiteApi::getInstance()->visitorOrderQuery($carNumber);
+            if (false === $result)
+                return $this->sendErrorMessage(false, 0, '没有查询到缴费记录', '没有查询到缴费记录');
+
+            $result = $result['data'];
+
+            if (0 == $result['total_fee'])
+                return $this->sendErrorMessage(false, 0, '缴费金额为 0 元', '缴费金额为 0 元');
+
+            $payServiceExpire = strtotime('+15 minute');
+            $parkingFees = array(
+                'park_type' => Item::PARKING_TYPE_GEMEITE,
+                'park_id' => $parkId,
+                'park_name' => $parkInfo->name,//$result['comm_name'],
+                'car_number' => strtoupper($result['plateNo']),
+                'buffer_time' => $payServiceExpire - time(),
+                'pay_value' => $result['total_fee'],
+                'out_trade_no' => $result['out_trade_no'],
+                'enter_time' => $result['first_service_stime'],
+                'park_time' => $result['service_fee_time'],//ParkingLot::model()->secToTime($result['service_fee_time']),
+                'pay_service_expire' => $payServiceExpire,
+                'out_result' => json_encode($result)
+            );
+        }
+        elseif (Item::PARKING_TYPE_AIKE === intval($parkInfo->third_type)) {
+            Yii::import('common.api.AikeApi');
+
+            $result = AikeApi::getInstance()->getPayBill($parkInfo->third_park_id, $carNumber);
+            if (false === $result)
+                return $this->sendErrorMessage(false, 0, '没有查询到缴费记录', '没有查询到缴费记录');
+
+            if (0 == $result['payValue'])
+                return $this->sendErrorMessage(false, 0, '缴费金额为 0 元', '缴费金额为 0 元');
+
+            $payServiceExpire = strtotime('+15 minute');
+            $parkingFees = array(
+                'park_type' => Item::PARKING_TYPE_AIKE,
+                'park_id' => $parkId,
+                'park_name' => $parkInfo->name,
+                'car_number' => strtoupper($carNumber),
+                'buffer_time' => $payServiceExpire - time(),
+                'pay_value' => $result['payValue'],
+                'out_trade_no' => $result['parkingBillId'],
+                'enter_time' => date('Y-m-d H:i:s', strtotime($result['enterDate'])),
+                'park_time' => $result['parkTime'],//ParkingLot::model()->secToTime($result['parkTime']),
+                'pay_service_expire' => $payServiceExpire,
+                'out_result' => json_encode($result)
+            );
+
+        }
+        elseif (Item::PARKING_TYPE_HANWANG === intval($parkInfo->third_type)) {
+            Yii::import('common.api.HanwangApi');
+
+            $result = HanwangApi::getInstance()->calFee($carNumber, $parkInfo->third_park_id);
+            if (false === $result)
+                return $this->sendErrorMessage(false, 0, '没有查询到缴费记录', '没有查询到缴费记录');
+            if (0 == $result['should'])
+                return $this->sendErrorMessage(false, 0, '缴费金额为 0 元', '缴费金额为 0 元');
+
+            $payServiceExpire = strtotime('+15 minute');
+            $parkTime = strtotime($result['endTime']) - strtotime($result['startTime']);
+            $parkingFees = array(
+                'park_type' => Item::PARKING_TYPE_HANWANG,
+                'park_id' => $parkId,
+                'park_name' => $parkInfo->name,
+                'car_number' => strtoupper($carNumber),
+                'buffer_time' => $payServiceExpire - time(),
+                'pay_value' => $result['should'] * 100,
+                'out_trade_no' => $result['billID'],
+                'enter_time' => date('Y-m-d H:i:s', strtotime($result['startTime'])),
+                'park_time' => $parkTime,
+                'pay_service_expire' => $payServiceExpire,
+                'out_result' => json_encode($result)
+            );
+
+        }
+        else {
+            return $this->sendErrorMessage(false, 0, '停车类型错误', '停车类型错误');
+        }
+
+        return $parkingFees;
+    }
+
+    /**
+     * 临时停车创单
+     * @param $saveData
+     * @return array
+     */
+    public function visitorCreate($saveData)
+    {
+        $sn = SN::initByParkingFees()->sn;
+        $orderFees = new OthersFees();
+        $orderFees->customer_id = $saveData['customer_id'];
+
+        $orderFees->sn = $sn;
+        $orderFees->model = 'ParkingFeesVisitor';
+        $orderFees->payment_id = 0;
+        $orderFees->amount = F::priceFormat($saveData['pay_value'] / 100);
+        $orderFees->bank_pay = $orderFees->amount;
+        $orderFees->red_packet_pay = '0.00';
+        $orderFees->source = $saveData['source'];
+        $orderFees->open_id = $saveData['open_id'];
+        $orderFees->note = $saveData['note'];
+
+        $ParkingFeesVisitor = new ParkingFeesVisitor();
+        $ParkingFeesVisitor->park_type = $saveData['park_type'];
+        $ParkingFeesVisitor->park_id = $saveData['park_id'];
+        $ParkingFeesVisitor->park_name = $saveData['park_name'];
+        $ParkingFeesVisitor->car_number = $saveData['car_number'];
+        $ParkingFeesVisitor->out_trade_no = $saveData['out_trade_no'];
+        $ParkingFeesVisitor->pay_type = $saveData['pay_type'];
+        $ParkingFeesVisitor->third_park_id = $saveData['third_park_id'];
+        $ParkingFeesVisitor->enter_time = $saveData['enter_time'];
+        $ParkingFeesVisitor->park_time = $saveData['park_time'];
+        $ParkingFeesVisitor->pay_service_expire = $saveData['pay_service_expire'];
+        $ParkingFeesVisitor->out_result = $saveData['out_result'];
+
+        if ($ParkingFeesVisitor->save()) {
+            $orderFees->object_id = $ParkingFeesVisitor->id;
+            if ($orderFees->save()) {
+                return array(
+                    'sn' => $orderFees->sn,
+                );
+            } else {
+                $oldRe = $ParkingFeesVisitor::model()->find(array('condition' => 'id=:id', 'params' => array(':id' => $ParkingFeesVisitor->id)));
+                $oldRe->delete();
+                return $this->sendErrorMessage(false, 0, '创建临时停车费订单失败master', json_encode($orderFees->getErrors()));
+            }
+        } else {
+            return $this->sendErrorMessage(false, 0, '创建临时停车费订单失败origin', json_encode($ParkingFeesVisitor->getErrors()));
+        }
+    }
+
+    /**
+     * 更新订单状态为 支付成功
+     * @param $sn
+     * @param $paymentId 支付方式ID
+     * @param $payTime 支付时间
+     * @param bool|false $isAdmin 是否是管理员操作
+     * @return bool
+     */
+    public function visitorPaySuccess($sn, $paymentId, $payTime, $isAdmin=false)
+    {
+        $otherFeeModel = OthersFees::model()->find('sn=:sn', array(':sn'=>$sn));
+        if (!$otherFeeModel)
+            return $this->sendErrorMessage(false, 0, '订单不存在', '订单不存在');
+
+        if ($otherFeeModel->status != Item::FEES_AWAITING_PAYMENT && !$isAdmin)
+            return $this->sendErrorMessage(false, 0, '订单状态不能修改为[已付款]', '订单状态不能修改为[已付款]');
+
+        $otherFeeModel->status = Item::FEES_TRANSACTION_ERROR;
+        $otherFeeModel->payment_id = $paymentId;
+        $otherFeeModel->pay_time = $payTime;
+        $otherFeeModel->update_time = time();
+
+        if ($otherFeeModel->save()) {
+            return $this->visitorTransactionSuccess($otherFeeModel);
+        }
+
+        return $this->sendErrorMessage(false, 0, '更新订单状态为[已付款]失败', '更新订单状态为[已付款]失败');
+    }
+
+    /**
+     * 更新订单状态为 交易成功
+     * @param OthersFees $otherFeeModel
+     * @return bool
+     * @throws CException
+     */
+    public function visitorTransactionSuccess(OthersFees $otherFeeModel)
+    {
+        if ($otherFeeModel->status != Item::FEES_TRANSACTION_ERROR)
+            return $this->sendErrorMessage(false, 0, '订单状态不可续卡', '订单状态不可续卡');
+
+        $parkingFees = ParkingFeesVisitor::model()->findByPk($otherFeeModel->object_id);
+        if ( ! $parkingFees)
+            return $this->sendErrorMessage(false, 0, '停车信息错误', '停车信息错误');
+
+        // 格美特
+        if (intval($parkingFees->park_type) === Item::PARKING_TYPE_GEMEITE) {
+            Yii::import('common.api.GemeiteApi');
+            $result = GemeiteApi::getInstance()->visitorOrderNotify(
+                $parkingFees->car_number,
+                $otherFeeModel->amount * 100,
+                $otherFeeModel->sn,
+                $parkingFees->out_trade_no,
+                date('YmdHis', $otherFeeModel->pay_time)
+            );
+
+            if ($result && 'success' === strtolower($result['data']['retmsg'])) {
+                $otherFeeModel->status = Item::FEES_TRANSACTION_SUCCESS;
+                $parkingFees->trade_status = 1;
+            }
+        }
+        // 艾科
+        elseif (intval($parkingFees->park_type) === Item::PARKING_TYPE_AIKE) {
+            Yii::import('common.api.AikeApi');
+            $result = AikeApi::getInstance()->synPayBill(
+                $parkingFees->third_park_id,
+                $parkingFees->out_trade_no,
+                $otherFeeModel->sn,
+                date('Y-m-d H:i:s', $otherFeeModel->pay_time),
+                strval($otherFeeModel->amount * 100),
+                '0',
+                '3'
+            );
+
+            if ($result) {
+                $otherFeeModel->status = Item::FEES_TRANSACTION_SUCCESS;
+                $parkingFees->trade_status = 1;
+            }
+        }
+        elseif (intval($parkingFees->park_type) === Item::PARKING_TYPE_HANWANG) {
+            Yii::import('common.api.HanwangApi');
+            $out_result = json_decode($parkingFees->out_result, true);
+            $result = HanwangApi::getInstance()->addBill(
+                $parkingFees->car_number,
+                $parkingFees->third_park_id,
+                $out_result['endTime'],
+                $otherFeeModel->amount,
+                $parkingFees->out_trade_no,
+                $otherFeeModel->sn
+            );
+
+            if ($result) {
+                $otherFeeModel->status = Item::FEES_TRANSACTION_SUCCESS;
+                $parkingFees->trade_status = 1;
+            }
+        }
+
+        # 通知专业公司 begin
+        $customer = Customer::model()->findByPk($otherFeeModel->customer_id);
+
+        $params = array(
+            'sn' => $otherFeeModel->sn,
+            'car_number' => $parkingFees->car_number,
+            'third_park_type' => $parkingFees->park_type,
+            'park_name' => $parkingFees->park_name,
+            'parking_fees_type' => 2,
+            'pay_time' => $otherFeeModel->pay_time,
+            'amount' => $otherFeeModel->amount,
+            'notify_status' => $parkingFees->trade_status,
+            'username' => $customer->name,
+            'mobile' => $customer->mobile,
+            'fee_unit' => '',
+            'fee_number' => '',
+            'enter_time' => $parkingFees->enter_time,
+            'park_time' => $parkingFees->park_time,
+            'source' => $otherFeeModel->source ? $otherFeeModel->source : 'CZY'
+        );
+
+        $this->notifyService($params);
+        # 通知专业公司 end
+
+        $parkingFees->notify_times += 1;
+        $parkingFees->notify_date = time();
+        if ( !$otherFeeModel->save() )
+            return $this->sendErrorMessage(false, 0, '通知成功，更新订单交易状态失败', json_encode($otherFeeModel->getErrors()));
+        if ( !$parkingFees->save() )
+            return $this->sendErrorMessage(false, 0, '通知成功，更新订单通知状态失败', json_encode($parkingFees->getErrors()));
+
+        return true;
+    }
+
+    /**
+     * 临停订单列表
+     * @param $customerId
+     * @param string $openId
+     * @param int $page
+     * @param int $pageSize
+     * @return array
+     */
+    public function visitorParkingOrderList($customerId, $openId='', $page=1, $pageSize=10)
+    {
+        $criteria = new CDbCriteria;
+        $criteria->compare('model', 'ParkingFeesVisitor');
+        $criteria->compare('customer_id', $customerId);
+        if ($openId)
+            $criteria->compare('open_id', $openId);
+
+        $criteria->addInCondition('status', array(Item::FEES_TRANSACTION_SUCCESS, Item::FEES_TRANSACTION_ERROR));
+
+        $criteria->order = 'id DESC';
+
+        $criteria->limit = $pageSize;
+        $criteria->offset = ($page-1) * $pageSize;
+
+        $list = OthersFees::model()->findAll($criteria);
+
+        $result = array();
+        if ($list) {
+            foreach ($list as $row) {
+                $result[] = array(
+                    'sn' => $row->sn,
+                    'car_number' => $row->ParkingFeesVisitor->car_number,
+                    'amount' => $row->amount,
+                    'park_name' => $row->ParkingFeesVisitor->park_name,
+                    'park_time' => $this->secToTime($row->ParkingFeesVisitor->park_time),
+                    'pay_time' => date('Y-m-d H:i:s', $row->pay_time)
+                );
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * 将秒转换车时间格式
+     * @param $sec
+     * @return string
+     */
+    public function secToTime($sec)
+    {
+        $sec = round($sec/60);
+        if ($sec >= 60){
+            $hour = floor($sec/60);
+            $min = $sec % 60;
+            $res = $hour.' 小时 ';
+            $min != 0  &&  $res .= $min.' 分';
+        }
+        else{
+            $res = $sec.' 分钟';
+        }
+        return $res;
+    }
+
+    /**
+     * 通知易停车收费系统
+     * @param $params
+     * @return mixed
+     */
+    public function notifyService($params)
+    {
+        $queryUrl = 'http://t.aparcar.cn:8099/api_v1/czy';
+        $queryData = $this->makeQueryData($params);
+
+        $result =  Yii::app()->curl->post($queryUrl, $queryData);
+
+        return $result;
+    }
+
+    /**
+     * 停车新旧收费系统判断
+     * @param $mobile
+     * @return array|bool
+     * @throws CException
+     */
+    public function verifyUserExisted($mobile)
+    {
+        //引入彩之云的接口
+        Yii::import('common.api.IceApi');
+        $result = IceApi::getInstance()->getParkingUserExisted($mobile);
+
+        if (false === $result)
+            return $this->sendErrorMessage(false, 0, '请求ICE返回失败', '请求ICE返回失败');
+
+        if (true != $result['existed'])
+            return false;
+
+        //$url = $result['jump'];
+        //dump($url);
+
+        $info = HomeConfigResource::model()->getResourceByKeyOrId('ETingCheH5');
+        if ($info->completeURL)
+            return array(
+                'url' => $info->completeURL
+            );
+
+        return false;
+    }
+
+    /************************************
+     * ** 签名方法 **
+     ***********************************/
+
+    /**
+     * 生成请求参数
+     * @param $para
+     * @return mixed
+     */
+    private function makeQueryData($para)
+    {
+        $para['sign'] = $this->makeSign($para);
+
+        return $para;
+    }
+
+    /**
+     * 生成签名
+     * @param array $para
+     * @return string
+     */
+    private function makeSign(array $para)
+    {
+        $para = $this->paraFilter($para);
+        $para = $this->argSort($para);
+
+        $secret = 'PKLT!#%$3542mfjx';
+
+        $signStr = $this->createLinkString($para).'&key='.$secret;
+
+        return strtoupper(md5($signStr));
+    }
+
+    /**********功能方法***********/
+    /**
+     * 对数组排序
+     * @param $para 排序前的数组
+     * @return 排序后的数组
+     */
+    public function argSort($para) {
+        ksort($para);
+        reset($para);
+        return $para;
+    }
+
+    /**
+     * 把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串
+     * @param $para 需要拼接的数组
+     * @return 拼接完成以后的字符串
+     */
+    public function createLinkString($para) {
+        $arg  = "";
+        while (list ($key, $val) = each ($para)) {
+            $arg.=$key."=".rawurlencode($val)."&";
+        }
+        //去掉最后一个&字符
+        $arg = substr($arg,0,count($arg)-2);
+
+        //如果存在转义字符，那么去掉转义
+        if(get_magic_quotes_gpc()){$arg = stripslashes($arg);}
+
+        return $arg;
+    }
+
+    /**
+     * 除去数组中的空值和签名参数
+     * @param $para 签名参数组
+     * @return 去掉空值与签名参数后的新签名参数组
+     */
+    public function paraFilter($para) {
+        $para_filter = array();
+        while (list ($key, $val) = each ($para)) {
+            if($key == "sign" || $key == "sign_type" || $val === "")continue;
+            else	$para_filter[$key] = $para[$key];
+        }
+        return $para_filter;
+    }
+}

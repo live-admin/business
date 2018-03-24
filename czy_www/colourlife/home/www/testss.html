@@ -1,0 +1,52 @@
+<html>
+
+	<head>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+		<title>自动获取定位访问者当前城市</title>
+
+		<!--不可省略-->
+
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=PKRTHOLpfzhfhvWZ0r6lGqr0"></script>
+
+		<!--不可省略-->
+
+	</head>
+
+	<body>
+
+		<!--不可省略-->
+
+		<div id="bdMapBox" style="display:none;"></div>
+
+		<script type="text/javascript">
+			// 百度地图API功能
+
+			var map = new BMap.Map("bdMapBox");
+
+			var nowCity = new BMap.LocalCity();
+
+			nowCity.get(bdGetPosition);
+
+			function bdGetPosition(result) {
+
+				var cityName = result.name; //当前的城市名
+
+				/*自定义代码*/
+
+				atCity.innerHTML = cityName;
+
+				/*自定义代码*/
+
+			}
+		</script>
+
+		<!--不可省略-->
+
+		<p>您当前所在的城市为：<span id="atCity"></span></p>
+		
+
+	</body>
+
+</html>

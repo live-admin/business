@@ -1,0 +1,30 @@
+body{
+  font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Helvetica,Arial,sans-serif ;
+}
+.state-wrap{
+  width:100%;
+  position: fixed;
+  top:3rem;
+  left:0;
+  text-align: center;
+}
+.state-wrap >div >img{
+  width:1.4rem;
+  height:1.4rem;
+}
+.state-wrap >div p{
+  font-size: .38rem;
+  color:#0D0D0D;
+  margin-top:.2rem;
+}
+.return-back{
+  display: inline-block;
+  width:3.45rem;
+  height:.84rem;
+  line-height: .84rem;
+  font-size: .32rem;
+  color:#fff;
+  background: #333b46;
+  margin-top:.5rem;
+  border-radius: 5px;
+}
