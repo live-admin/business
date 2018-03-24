@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="webname">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<link type="text/css" rel="stylesheet" href="css/css.css" />
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<title>上门家访</title>
+</head>
+<!--<body>-->
+	<!--<div class="sign_info">-->
+		<!--<dl>-->
+			<!--<dt><span>业主姓名：</span><em>张三</em></dt>	-->
+			<!--<dd><span>业主住址：</span><em>彩科彩悦大厦彩科大厦701</em></dd>	-->
+			<!--<dd><span>评价时间：</span><em>2015-07-03   23：00</em></dd>-->
+			<!--<dd><span>评价内容：</span><em>非常的热情，非常的专业~~</em></dd>-->
+		<!--</dl>-->
+		<!--<div class="sign_judge">-->
+			<!--<span>综合评价：</span>	-->
+			<!--<em></em>-->
+			<!--<i>非常满意</i>-->
+		<!--</div>-->
+		<!--<div class="clear"></div>-->
+		<!-- -->
+		<!--<div class="sign_photo">-->
+			<!--<img src="images/test/sign_p1.png" />	-->
+			<!--<img src="images/test/sign_p2.png" />	-->
+			<!--<img src="images/test/sign_p3.png" />	-->
+			<!--<div class="clear"></div>-->
+		<!--</div>-->
+			<!-- -->
+	<!--</div>-->
+	<!-- -->
+	<!--<div class="sign_add">-->
+		<!--<form>-->
+			<!--&lt;!&ndash;<textarea></textarea>&ndash;&gt;-->
+			<!--<input type="button" class="sub" value="添加标记" />-->
+		<!--</form>	-->
+	<!--</div>-->
+<!--</body>-->
+<body>
+<div class="Markup_page" v-show="Markup">
+	<div class="sign_info">
+		<ul class="info-list">
+			<li class="list-item"><span class="title">业主姓名：</span><p class="info-content" v-text="user_name"></p></li>
+			<li class="list-item"><span class="title">业主住址：</span><p class="info-content" v-text="community_name"></p></li>
+			<li class="list-item"><span class="title">评价时间：</span><p class="info-content" v-text="time_create"></p></li>
+			<li class="list-item list-item-last"><span class="title">评价内容：</span><p class="info-content" v-text="content"></p></li>
+		</ul>
+
+		<div class="sign_judge">
+			<span>综合评价：</span>
+			<em v-for="o in Smiling_face" :key="o"></em>
+			<em class='gray' v-for="i in Cry"></em>
+			<i>{{level_value}}</i>
+		</div>
+		<div class="clear"></div>
+		<!--<div class="sign_photo">-->
+		<!--<img src="" />-->
+		<!--<div class="clear"></div>-->
+		<!--</div>-->
+	</div>
+	<div class="sign_add">
+		<form>
+			<input type="button" class="sub" v-model="sign" id="btnTagComment" @click="cry_tiejia" />
+		</form>
+	</div>
+</div>
+
+</body>
+<script>
+	$(function(){
+		var vm =new Vue({
+			el:".Markup_page",
+			data:{
+				access_token:'',
+				Markup:false,
+				comment_id:'',
+				user_name:'',//业主姓名
+				community_name:'',//地址
+				time_create:'',//评价时间
+				content:'',//评价内容
+				level_type:'',//评分等级
+				level_value:'',//评分等级描述
+				mark:'',//是否标记
+				Smiling_face:'',
+				Cry:'',
+				sign:'',//标记
+			},
+			methods:{
+				start:function(){
+					var _this = this;
+					$.ajax({
+						type: "get",
+						url: getUrl()+"/employee/comment/details",
+						data:{
+							'access_token':_this.access_token,
+							'comment_id':_this.comment_id
+						},
+						dataType: "json",
+						success: function(data){
+							console.log(data);
+							if(data.code == "0"){
+								_this.Markup = true;
+								_this.user_name=data.content.user_name;//业主姓名
+								_this.community_name=data.content.community_name;//地址
+								_this.time_create=data.content.time_create;//评价时间
+								_this.content=data.content.content;//评价内容
+								_this.mark=data.content.mark;//是否标记
+								_this.level_type=data.content.level_type;//综合评价
+								_this.level_value=data.content.level_value;//综合评价
+								if(_this.mark==1){
+									_this.sign='取消标记';
+								}else{
+									_this.sign='添加标记';
+								}
+								if(_this.level_type==0){
+									_this.Smiling_face=1;
+									_this.Cry=3;
+								}else if(_this.level_type==1){
+									_this.Smiling_face=2;
+									_this.Cry=2;
+								}else if(_this.level_type==2){
+									_this.Smiling_face=3;
+									_this.Cry=1;
+								}else if(_this.level_type==3){
+									_this.Smiling_face=4;
+									_this.Cry=0;
+								}
+							}else{
+								toastMsg(data.message,3000);
+							}
+						}
+					});
+				},
+				cry_tiejia:function(){
+					var _this = this;
+					if(_this.mark==0){
+						_this.mark=1;
+						_this.sign='取消标记';
+						_this.cry_ajax();
+					}else if(_this.mark==1){
+						_this.mark=0;
+						_this.sign='添加标记';
+						_this.cry_ajax();
+					}
+				},
+				cry_ajax:function(){
+					var _this = this;
+					$.ajax({
+						type:"get",
+						url: getUrl()+"/employee/comment/mark",
+						data:{
+							'access_token':_this.access_token,
+							'comment_id':_this.comment_id,
+							'mark':_this.mark,
+						},
+						dataType: "json",
+						success: function(data){
+							console.log(data);
+							if(data.code == "0"){
+								if(_this.mark==1){
+									toastMsg('标记成功',3000);
+								}else{
+									toastMsg('取消标记成功',3000);
+								}
+							}else{
+								toastMsg(data.message,3000);
+							}
+						}
+					});
+				},
+				GetQueryString:function(name) {
+					var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+					var r = window.location.search.substr(1).match(reg);
+					if(r!=null)return  unescape(r[2]); return null;
+				}
+			},
+			created:function(){
+				if(this.GetQueryString('access_token')!=null){
+					this.access_token = this.GetQueryString('access_token');
+					this.comment_id=this.GetQueryString('comment_id');
+					this.start();
+				}else{
+					toastMsg("access_token不存在");
+				}
+
+			}
+		})
+	});
+</script>
+</html>

@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="webname">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<link type="text/css" rel="stylesheet" href="css/css.css" />
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<!--<script type="text/javascript" src="js/base.js"></script>-->
+<title>上门家访</title>
+</head>
+<body>
+	<div class="account_sub" v-show="Exhibition">
+		<form>
+			<h2>确认彩之云账号</h2>
+			<div class="account_info">
+				<div class="account_face"><img src="images/test/account_face.png" /></div>
+				<dl>
+					<dt><span>彩之云账户：</span><em v-text="czy_account"></em></dt>
+					<dd><span>你的姓名：</span><em v-text="czy_name"></em></dd>
+				</dl>
+			</div>
+			<div class="account_tip">
+				<p>若未能获取您的彩之云账号信息，请确认您OA账号的手机号码是否和彩之云一致，OA手机号码需要修改请联系人力资源工作人员</p>	
+			</div>
+			<input type="button" class="sub" value="确认绑定" @click="Confirm_binding" />
+		</form>	
+	</div>
+</body>
+<script>
+	$(function(){
+		var vm =new Vue({
+			el:".account_sub",
+			data:{
+				czy_account:'',
+				czy_name:'',
+				Exhibition:false,
+				access_token:'',
+			},
+			methods:{
+				initPage:function(){
+					var _this = this;
+					$.ajax({
+						type: "get",
+						url: getUrl()+"/employee/manager/authorize",
+						data:{'access_token':_this.access_token},
+						dataType: "json",
+						success: function(data){
+							console.log(data);
+							if(data.code == "0"){
+								_this.Exhibition = true;
+								if(data.content.bind_state==1){
+									_this.czy_account = data.content.bind_info.mobile;
+									_this.czy_name = data.content.bind_info.username;
+									window.location.href="comment_rank.html?access_token="+_this.access_token;
+								}else if(data.content.bind_state==2){
+									_this.czy_account = data.content.bind_info.mobile;
+									_this.czy_name = data.content.bind_info.username;
+								}
+
+							}else{
+								toastMsg(data.message,3000);
+							}
+						}
+					});
+				},
+				Confirm_binding:function(){
+					var _this = this;
+					$.ajax({
+						type:"POST",
+						url: getUrl()+"/employee/visit/bind",
+						data:{'access_token':_this.access_token},
+						dataType: "json",
+						success: function(data){
+							console.log(data);
+							if(data.code == "0"){
+								window.location.href="comment_rank.html?access_token="+_this.access_token;
+							}else{
+								toastMsg(data.message,3000);
+							}
+						}
+					});
+				},
+				GetQueryString:function(name) {
+					var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+					var r = window.location.search.substr(1).match(reg);
+					if(r!=null)return  unescape(r[2]); return null;
+				}
+			},
+			created:function(){
+				if(this.GetQueryString('access_token')!=null){
+//					localStorage.setItem("access_token",GetRequest().split("=")[1]);
+					this.access_token = this.GetQueryString('access_token');
+					this.initPage();
+				}else{
+					toastMsg("access_token不存在");
+				}
+
+			}
+		})
+	});
+</script>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="webname">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>E家访</title>
+<link type="text/css" rel="stylesheet" href="css/css.css" />
+<link rel="stylesheet" type="text/css" href="css/mobileSelect.css" />
+<script type="text/javascript" src="js/mobileSelect.js"></script>
+<!-- <link type="text/css" rel="stylesheet" href="js/webuploader.css" /> -->
+</head>
+<body>		
+	<div class="comment_add">
+		<form method="post" action="" id="formComment">
+			<div class="cad_name">
+				当前注册小区：<span v-text="bind_info.comnunity_name">2222</span>	
+			</div>
+			
+			<div class="manager_info">
+				
+				<div class="info_pic">
+					<img :src="bind_info.manager_img" />	
+				</div>
+				
+				<dl>
+					<dt><span>客户经理：</span><em v-text="bind_info.manager_name"></em><i class="zs">专属</i></dt>	
+					<dd>联系电话：<span v-text="bind_info.manager_mobile">13215454444</span></dd>
+					<dd>所在职位：<span v-text="bind_info.manager_job">专属客户经理</span></dd>
+				</dl>
+				
+				<div class="clear"></div>	
+			</div>
+			<div class="com_write">
+				<div class="comment_type" id="selectType">
+					<span>选择评价类型</span>
+					<span class="arrow_right"></span>
+					<span class="type_val"></span>
+					<input type="hidden" name="comment_type" id="comment_type" value="">
+				</div>
+				<div class="clear"></div>
+				
+				<div class="write_area">
+					
+					<div class="com_total">
+						<span>总体评价：</span>	
+						<a v-for="(item,index) in starLeve.length" :class="{'face-gray':true,'face':starLeve[index].statu}"  @click="star(index)"><em></em></a>
+						<a class="com_history" href="JavaScript:void(0)" @click="historyComment">
+							查看往期评价&gt;&gt;
+						</a>
+						<i class="level-text" v-text="starLeve[param.level-1].txt" v-if="param.level != -99"></i>
+					</div>
+					<div class="clear"></div>
+					
+					<textarea name="content" placeholder="服务态度如何？专业水平如何？是否满意？(5-500字.欢迎拍砖~~）" v-model="param.comment"></textarea>
+					<div class="add_pic">
+                    	<div id="fileList" class="uploader-list"></div>
+						<a  id="btnUploadFile" href="javascript:void(0);" class="pic_btn" > </a>
+						<div class="clear"></div>
+					</div>
+						
+				</div>
+
+
+				
+				<input type="button" class="sub" value="确认提交" id="btnSubmit" @click="btnSubmit"/>
+					
+			</div>
+				
+		</form>
+        
+        <div id="filePicker" class="pic_btn" style="display:none" ></div>
+        
+	</div>
+	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="js/common.js"></script>
+	<script type="text/javascript" src="js/webuploader.min.js"></script> 
+	<script type="text/javascript" src="js/upload.js"></script>
+	<script type="text/javascript" src="js/vue.js"></script>
+<script type="text/javascript">
+	var currentDayCommentCount = '';
+    var maxCommentCountOneDay = '';    
+    var currentMonthCommentCount = '';
+    var maxCommentCountOneMonth = '';
+    var uploadFile = [];
+    var allowUploadPicCount = 3;
+    var isUploading = false;
+	var vm = new Vue({
+		el:".comment_add",
+		data:{
+			bind_info:{
+				community_name:'',
+	            manager_name:'',
+	            manager_mobile:'',
+	            manager_job:'',
+	            manager_img:'',
+	            manager_id:'',
+			},
+			starLeve:[
+				{level:"1",txt:'不满意',statu:false},
+				{level:"2",txt:'一般',statu:false},
+				{level:"3",txt:'满意',statu:false},
+				{level:"4",txt:'非常满意',statu:false},
+			],
+			typelist:[],
+			newtypelist:[],
+
+			param:{
+				evaluate_type:'',
+				level:'-99',
+				comment:'',
+				image:'',
+			},
+			user_id:'',
+		},
+		methods:{
+			initPage:function(){
+				var _this = this; 
+				$.ajax({
+	                type: "get",
+	                url: getUrl()+"/get/commit/limit",
+	                data:{'access_token':localStorage.getItem("access_token"),'user_id':this.user_id},
+	                dataType: "json",
+	                success: function(data){
+	                	if(data.code == "0"){
+	                		currentDayCommentCount = data.content.user_day_num;
+	                		maxCommentCountOneDay = data.content.day_num;
+					    	currentMonthCommentCount =data.content.user_month_num;
+					    	maxCommentCountOneMonth = data.content.month_num;
+	                    }else{
+	                        toastMsg(data.message);
+	                    }
+	                }
+	            });
+			},
+			commentType:function(){
+				var _this = this; 
+				$.ajax({
+	                type: "get",
+	                url: getUrl()+"/evaluate/type",
+	                data:{'access_token':localStorage.getItem("access_token")},
+	                dataType: "json",
+	                success: function(data){
+	                	if(data.code == "0"){
+	                		if(data.content.length > 0){
+	                			_this.typelist = data.content;
+	                			var mobileSelect1 = new MobileSelect({
+								    trigger: '#selectType', 
+								    typeVal: '.type_val',
+								    title: '选择评价类型', 
+								    wheels: [
+								    	{data:_this.typelist}
+								    ],
+								    position:[0],
+								    callback:function(indexArr, data){
+								        _this.param.evaluate_type = data[0].id;
+								    }  
+								});
+	                		}
+	                    }else{
+	                        toastMsg(data.message);
+	                    }
+	                }
+	            });
+			},
+			star:function(k){
+				this.param.level = k+1;
+				for(var j=0;j<this.starLeve.length;j++){
+					this.starLeve[j].statu =false;
+				}
+
+				for(var i=0;i<=k;i++){
+					this.starLeve[i].statu = true;
+				}
+			},
+			historyComment:function(){
+				window.location.href="commentlist.html"
+			},
+			btnSubmit:function(){
+				var _this = this; 
+				if(_this.param.level == '-99'){
+					toastMsg("请轻触笑脸，做总体评价");
+					return;
+				}
+				if(_this.param.evaluate_type == ''){
+					toastMsg("请选择评价类型");
+					return;
+				}
+
+				if(currentDayCommentCount >= maxCommentCountOneDay)
+				{
+					toastMsg("今天您已经评价过了，感谢您对我们的支持。", 10000);
+					return;
+				}
+
+				if(currentMonthCommentCount >= maxCommentCountOneMonth)
+				{
+					toastMsg("亲~已经不能再评价啦，每个月最多评价" + maxCommentCountOneMonth + "次。记得下个月再来哦。", 10000);
+					return;
+				}
+
+				if(isUploading)
+				{
+					toastMsg("请等待图片上传完成。");
+					return ;
+				}
+				console.log(uploadFile);
+				$.ajax({
+	                type: "post",
+	                url: getUrl()+"/comment/commit",
+	                data:{
+						'access_token':localStorage.getItem("access_token"),
+						"evaluate_type":_this.param.evaluate_type,
+						"level":_this.param.level,
+						"content":_this.param.comment,
+						"image":JSON.stringify(uploadFile),
+						"manager_id":_this.bind_info.manager_id
+					},
+	                dataType: "json",
+	                success: function(data){
+						console.log(data);
+	                	if(data.code == "0"){
+	                		 window.location.href="commentsuccess.html";
+	                    }else{
+	                        toastMsg(data.message);
+	                    }
+	                }
+	            });
+			},
+			GetQueryString:function(name) {//获取url里边值
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if(r!=null)return  unescape(r[2]); return null;
+			}
+		},
+		created:function(){
+//			this.bind_info.comnunity_name = GetRequest().split("&")[0].split("=")[1];
+//			this.bind_info.manager_name = GetRequest().split("&")[1].split("=")[1];
+//			this.bind_info.manager_mobile = GetRequest().split("&")[2].split("=")[1];
+//			this.bind_info.manager_job = GetRequest().split("&")[3].split("=")[1];
+//			this.bind_info.manager_img = GetRequest().split("&")[4].split("=")[1];
+//			this.bind_info.manager_id = GetRequest().split("&")[5].split("=")[1];
+			var user_information =JSON.parse(window.sessionStorage.getItem('user_information'));
+			console.log(user_information);
+			var user_id=JSON.parse(window.sessionStorage.getItem('user_id'));
+			console.log(user_id);
+			if(user_information!=null){
+				this.bind_info.comnunity_name=user_information.community_name;
+				this.bind_info.manager_name=user_information.manager_name;
+				this.bind_info.manager_mobile=user_information.manager_mobile;
+				this.bind_info.manager_job=user_information.manager_job;
+				this.bind_info.manager_img=user_information.manager_img;
+				this.bind_info.manager_id=user_information.manager_id;
+			}
+			if(user_id!=null){
+				this.user_id=user_id;
+				this.initPage();
+			}else{
+				toastMsg("没有用户id", 2000);
+			}
+			this.commentType();
+		}
+	})
+</script>
+</body>
+</html>

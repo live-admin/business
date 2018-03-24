@@ -1,0 +1,114 @@
+﻿/*通用类*/
+*{
+	margin:0;
+	padding:0;	
+}
+body{		
+	width:100%;	
+	margin:0 auto;
+	font-size:14px;	
+	font-family:"Microsoft Yahei";
+	background-color: #F9F9F9;
+}
+
+.container{
+	margin: 0 12px;
+}
+
+.title{
+	font-size:24px; 
+	text-align: center; 
+	padding: 29px 0; 
+	font-weight:normal;
+	color: #1D3259;
+}
+
+.icon-tie{
+	height: 130px;
+	background: url(../images/icon-tie.png) center center no-repeat ;
+	background-size: auto 100% ;
+	margin: 15px 0;
+}
+
+
+.margin-btnsapce{margin:40px 0;}
+
+.btn{
+	display: block;
+	text-decoration: none;
+	text-align: center;
+	padding: 12px 10px;
+	font-size: 24px;
+	color: #fff;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
+	border-radius: 5px;
+	
+}
+.btn-orange{background-color: #E05D06;}
+.manager-add .info{
+	text-align: center; 
+	color: #686868; 
+	font-size: 14px; 
+	padding: 0 10px;
+	line-height: 1.5em;
+}
+.phone-service span:nth-child(2){
+	font-size: 24px;
+	/*font-weight: bold;*/
+	color: #F4B04D;
+}
+.icon-phone{
+	display: inline-block;
+	width: 36px;
+	height: 36px;
+	background: url(../images/icon-phone.png) 0 0 no-repeat;
+	background-size: auto 100%;
+	padding-right: 10px;
+	line-height: 36px;
+	font-style: normal;
+	font-size:24px;
+}
+.icon-phone:after{content: "."; visibility:hidden;}
+
+.phone-service{
+	margin-top:30px; 
+	margin-bottom: 20px; 
+	height: 36px;
+	line-height: 36px;
+	text-align: center;
+}
+
+.phone-service .phone-number{
+	font-size: 24px;
+	text-decoration: none;
+	color: #F4AF4C;
+	font-weight: bold;
+	display: inline-block;
+	height: 36px;
+}
+
+/*iPhone4及以下的设备*/
+@media screen and (max-height:480px){
+
+	.title{
+		padding: 18px 0 10px 0;
+	}
+
+	.icon-tie {
+		height: 120px;
+	}
+
+	.margin-btnsapce
+	{
+		margin: 20px 0;
+	}
+	
+	.btn{
+		font-size: 18px;
+		padding: 10px 8px;
+
+	}
+}

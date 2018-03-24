@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="webname">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>E家访</title>
+<link type="text/css" rel="stylesheet" href="css/css.css" />
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<!-- <script type="text/javascript" src="js/home.js"></script> -->
+<script type="text/javascript">
+// var queryManagerUrl = "<?php echo $this->createUrl("QueryManager");?>";
+// var bindManagerUrl = "<?php echo $this->createUrl("BindManagerHandler");?>";
+</script>
+</head>
+
+<body>
+	
+	<div class="manager_sub">
+		<form id="frmQueryManager">
+			<input type="text" name="mobile" class="text tel_num" value="" id="txtMobile" placeholder="请输入客户经理手机号码" autocomplete="off" v-model="mobile"/>
+			<div class="tel_query" @click="submitMobile()">搜索</div>
+        </form>
+
+		<form action="" class="manager-info-form" v-if="valid">
+        	<input type="hidden" name="managerid" value="" id="txtManagerId" >
+			<div class="manager_info">
+				<div class="info_pic">
+					<img :src="manageInfo.manager_headimg" id="managerPortrait" />	
+				</div>
+				
+				<dl>
+					<dt><span>客户经理：</span><span id="managerName" v-text="manageInfo.name"></span></dt>	
+					<dd><span>联系电话：</span><span id="managerMobile" v-text="manageInfo.mobile"></span></dd>
+					<dd><span>所在职位：</span v-text="manageInfo.job">彩生活专属客户经理</dd>
+				</dl>
+				
+				<div class="clear"></div>	
+			</div>
+			<input type="button" class="sub" value="确认绑定" id="btnBindManager" @click="bindManage"/>
+		</form>
+	</div>
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<script type="text/javascript">
+	var vm = new Vue({
+		el:".manager_sub",
+		data:{
+			url:'',
+
+			valid:false,
+			mobile:'',
+			token:'',
+			manageInfo:{
+				manager_id:'',
+			    name:'',
+			    mobile:'',
+			    job:'',
+			    manager_headimg:'',
+			}
+		},
+		methods:{
+			submitMobile:function(){
+				var _this = this;
+				_this.valid = false;
+				if(_this.mobile!=''){
+					if(_this.validateMobile(_this.mobile)){
+						toastMsg("正在查询客户经理，请稍等...", 5000);
+						$.ajax({
+							type:'get',
+							url:getUrl()+"/manager/mobile",
+							datatype:'json',
+							data:{mobile:_this.mobile,access_token:_this.token},
+							success:function(data){
+								if(data.code == "0"){
+									clearToastMsg();
+									_this.valid = true;
+									_this.manageInfo = data.content;
+								}else{
+									toastMsg(data.message,3000);
+								}
+							}
+						})
+					}else{
+						toastMsg("请输入正确的手机号码！", 5000);
+					}
+				}else{
+					toastMsg("请输入手机号码", 5000);
+				}
+			},
+			validateMobile:function(str){
+				var valids=/^1[3-9]\d{9}$/;
+				if(!valids.test(str)){  
+	            	return false;  
+	            } else {  
+	            	return true;  
+	           }  
+			},
+			checkPhone:function(str){
+					var re = /^0\d{2,3}-?\d{7,8}$/;
+					if(re.test(str)){
+						alert("正确");
+					}else{
+						alert("错误");
+					}
+			},
+			bindManage:function(){
+				var _this = this;
+				toastMsg("正在绑定...", 10000);
+				$.ajax({
+					type:'post',
+					url:getUrl()+"/manager/bind",
+					datatype:'json',
+					data:{manager_id:_this.manageInfo.manager_id,access_token:_this.token},
+					success:function(data){
+						console.log(data);
+						if(data.code == "0"){
+							clearToastMsg();
+							toastMsg("绑定成功", 2000);
+//							setTimeout(function(){
+								window.location.href="comment.html"
+//							},2000);
+							
+						}else{
+							toastMsg(data.message,3000);
+						}
+					}
+				})
+			}
+		},
+		created:function(){
+			this.token = localStorage.getItem("access_token");
+		},
+	})
+</script>
+</body>
+</html>

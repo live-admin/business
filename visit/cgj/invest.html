@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="webname">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<link type="text/css" rel="stylesheet" href="css/css.css" />
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<title>上门家访</title>
+<style>
+	.invest_area{
+		margin-bottom:7.5em;
+	}
+</style>
+</head>
+<body>
+<div class="box_body">
+	<div class="invest_search">
+		<div class="time_btn lt">
+			<form>
+				<input type="text" class="text" placeholder="按照小区名称进行搜索" v-model="Community_name"  v-on:input ="Community_Obtain"/>
+				<!--<input type="button" class="sub" value="" @click="mobile_click"/>-->
+			</form>
+		</div>
+		<div class="search_area">
+			<form>
+				<input type="text" class="text" placeholder="按照业主手机号进行搜索" v-model="mobile"/>
+				<input type="button" class="sub" value="" @click="mobile_click"/>
+			</form>
+		</div>
+		<div class="time_btn_three lt" @click="Selection_three">{{Time_home_display}}</div>
+		<div class="clear"></div>
+	</div>
+	<!--搜索-->
+	<ul class="drop-list-item-box" v-show="CommunityS_off">
+		<!--<li data-value="all">全部小区</li>-->
+		<li v-for="value,index in CommunityS" v-bind:class="{selected:index==xiaoquid}"  @click="Community_click(value,index)">{{value.community_name}}</li>
+	</ul>
+	<!--月份-->
+	<ul class="drop-list-item-box" v-show="Time_display">
+		<li v-for="value,index in times" v-bind:class="{selected:index==yuefenid}" @click="Selection_time(value.value,value.time,index)">{{value.time}}</li>
+	</ul>
+	<div class="invest_area">
+		<div class="invest_head">
+			<span>评价时间</span>
+			<span>业主姓名</span>
+			<span>小区</span>
+			<span class="end">评价</span>
+		</div>
+		<div class="invest_li" v-for="(item,index) in Evaluation_data">
+			<div class="li_bg"></div>
+			<div class="li_inner">
+				<dl>
+					<dt v-text="item.time_create"></dt>
+					<!--<dd>23:00:30</dd>-->
+				</dl>
+				<span v-text="item.user_name"></span>
+				<dl class="pos">
+					<dt v-text="item.community_name"></dt>
+					<!--<dd v-text="item.time_create"></dd>-->
+				</dl>
+				<span>
+					<a href="javascript:;" @click="evaluate_click(item)"><em v-text="item.level_value"></em><em>&gt;</em></a>
+				</span>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+	<div class="invest_count">
+		<p>本月共有 <span v-text="General_evaluation"></span> 条评价</p>
+		<dl v-for="value,index in Type_selection" @click="guige(index)" v-bind:class="{now:index==guigeSpan}">
+			<dt>{{value.name}}</dt>
+			<dd class="red">{{value.number}}</dd>
+		</dl>
+	</div>
+	<div class="invest_count_tip"></div>
+</div>
+
+</body>
+<script type="text/javascript">
+	$(function(){
+		var vm =new Vue({
+			el:".box_body",
+			data:{
+				Evaluation_data:[],
+				time:'',
+				mobile:'',
+				level_type:'',
+				mark:'',
+				org_uuid:'',
+				page:'',//页数
+				General_evaluation:'',//总条数
+				count:[],
+				guigeSpan:"-1",  //控制点亮状态 -1为默认不点亮
+				Type_selection:[
+					{
+						name:'非常满意',
+						number:''
+					},
+					{
+						name:'满意',
+						number:''
+					},
+					{
+						name:'一般',
+						number:''
+					},
+					{
+						name:'不满意',
+						number:''
+					}
+				],
+				times:[],
+				Time_display:false,
+				Time_home_display:'全部时间',
+				xiaoquid:'-1',
+				yuefenid:'-1',
+				Community_name:'',//小区名称
+				CommunityS_off:false,
+				CommunityS:[],
+			},
+			methods:{
+				initPage:function(){
+					var _this = this;
+					$.ajax({
+						type: "get",
+						url: getUrl()+"/employee/comment/list",
+						data:{
+							'access_token':_this.access_token,
+							'time':_this.time,
+							'mobile':_this.mobile,
+							'level_type':_this.level_type,
+							'mark':_this.mark,
+							'org_uuid':_this.org_uuid,
+							'page':_this.page,
+						},
+						dataType: "json",
+						success: function(data){
+							console.log(data);
+							if(data.code == "0"){
+								_this.Evaluation_data=data.content.list.data;
+								_this.count=data.content.count;
+								_this.Type_selection[0].number=data.content.count.level_four;
+								_this.Type_selection[1].number=data.content.count.level_three;
+								_this.Type_selection[2].number=data.content.count.level_two;
+								_this.Type_selection[3].number=data.content.count.level_one;
+								_this.General_evaluation=data.content.list.total;
+							}else{
+								toastMsg(data.message,3000);
+							}
+						}
+					});
+				},
+				guige:function(index){  //当点击时候点亮，同级的span标签删除Class
+					this.guigeSpan = index;
+					console.log(index);
+					if(index==0){
+						this.level_type=3;
+					}else if(index==1){
+						this.level_type=2;
+					}else if(index==2){
+						this.level_type=1;
+					}else if(index==3){
+						this.level_type=0;
+					}
+					this.initPage();
+				},
+				all_Time:function(){
+					var _this = this;
+					$.ajax({
+						type: "get",
+						url: getUrl()+"/employee/comment/time",
+						data:{
+							'access_token':_this.access_token,
+						},
+						dataType: "json",
+						success: function(data){
+							console.log(data);
+							if(data.code == "0"){
+								_this.times=data.content;
+								console.log(_this.times);
+							}else{
+								toastMsg(data.message,3000);
+							}
+						}
+					});
+				},
+				Selection_three:function(){
+					this.Time_display=true;
+				},
+				Selection_time:function(value,time,index){
+					this.time=value;
+					this.Time_home_display=time;
+					this.yuefenid=index;
+					this.initPage();
+					this.Time_display=false;
+				},
+				mobile_click:function(){//姓名手机搜索
+					this.initPage();
+				},
+				Community_Obtain:function(){//小区获取
+					var _this=this;
+					console.log(_this.access_token);
+					console.log(_this.Community_name);
+					if(_this.Community_name!=''){
+						$.ajax({
+							type: "get",
+							url: getUrl()+"/employee/comment/org",
+							data:{
+								'access_token':_this.access_token,
+								'name':_this.Community_name
+							},
+							dataType: "json",
+							success: function(data){
+								console.log(data);
+								if(data.code == "0"){
+									_this.CommunityS=data.content.result;
+									console.log(_this.CommunityS);
+									_this.CommunityS_off=true
+								}else{
+									toastMsg(data.message,3000);
+								}
+							}
+						});
+					}else{
+						_this.CommunityS_off=false;
+					}
+				},
+				Community_click:function(value,index){//选择小区
+					this.CommunityS_off=false;
+					this.org_uuid=value.community_uuid;
+					this.xiaoquid=index;
+					this.initPage();
+				},
+				evaluate_click:function(item){
+//					console.log(item);
+					window.location.href="sign_add.html?access_token="+this.access_token+"&comment_id="+item.id;
+				},
+				GetQueryString:function(name) {
+					var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+					var r = window.location.search.substr(1).match(reg);
+					if(r!=null)return  unescape(r[2]); return null;
+				}
+			},
+			created:function(){
+				console.log(this.GetQueryString('access_token'));
+				console.log(this.GetQueryString('mark'));
+				if(this.GetQueryString('access_token')!=null){
+					this.access_token = this.GetQueryString('access_token');
+					this.mark=this.GetQueryString('mark');
+					this.initPage();
+					this.all_Time();
+				}else{
+					toastMsg("access_token不存在");
+				}
+
+			},
+		})
+//		$(".invest_count dl").click(function(){
+//			$(this).siblings('dl').removeClass('now');  // 删除其他兄弟元素的样式
+//			$(this).addClass('now');                            // 添加当前元素的样式
+//		})
+	});
+</script>
+</html>

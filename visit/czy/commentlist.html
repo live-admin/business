@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="webname">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>E家访</title>
+<link type="text/css" rel="stylesheet" href="css/css.css" />
+</head>
+<body>
+<div class="comment_list">
+	<div class="com_li"  v-if="content.length != 0" v-for="item in content">
+		<p class="head">
+			<span>类型:</span>
+			<span v-text="item.name">评价类型</span>
+		</p>
+		<p class="item">
+			<span>总体评价:</span>
+			<em class="gray" :class="{face: index < item.level}" v-for="(k,index) in 4" ></em>
+			<span class = "comment_text"></span>
+		</p>
+		<p class="item">
+			<span>评价内容:</span>
+			<span v-text="item.content">我是评价内容</span>
+		</p>
+		<p class="item">
+			<span>评价时间:</span>
+			<span v-text="item.time_create">2017-06-25</span>
+		</p>
+
+	</div>
+
+	<div class="history_empty" v-if="content.length == 0">
+		<img src="images/empty.png">
+		<p>暂无历史记录!!</p>
+	</div>
+</div>
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<script type="text/javascript">
+	var vm = new Vue({
+		el:".comment_list",
+		data:{
+			content:[]
+		},
+		methods:{
+			initPage:function(){
+				var _this = this;
+				$.ajax({
+	                type: "get",
+	                url: getUrl()+"/past/evaluate",
+	                data:{'access_token':localStorage.getItem("access_token"),page:'',page_size:''},
+	                dataType: "json",
+	                success: function(data){
+	                	if(data.code == "0"){
+	                		_this.content = data.content;
+	                		for(var i=0;i<_this.content.length;i++){
+	                			if(_this.content[i].level > i){
+	                				_this.content[i]
+	                			}
+	                		}
+	                    }else{
+	                        console.log(data.message);
+	                    }
+	                }
+	            });
+			}
+		},
+		created:function(){
+			this.initPage();
+		}
+	})
+</script>
+</body>
+</html>

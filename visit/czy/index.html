@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>E家访</title>
+	<link type="text/css" rel="stylesheet" href="css/style.css" />
+	<link type="text/css" rel="stylesheet" href="css/css.css" />
+
+</head>
+<body>
+<div class="content" v-if="showblock">
+	<div class="wrapper">
+		<div class="container manager-add">
+			<h1 class="title">选择您的专属客户经理</h1>
+			<div class="icon-tie"> </div>
+			<div class="margin-btnsapce">
+			<a href="bindmanager.html" class="btn btn-orange">开始绑定</a>
+			</div>
+			<div class="info">绑定专属的客户经理，我们可以即时为您提供服务</div>
+			<div class="phone-service"><span class="icon-phone"></span><span v-text="content.contact_mobile"></span></div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<script type="text/javascript">
+	var vm = new Vue({
+		el:".content",
+		data:{
+			showblock:false,
+			content:{
+				contact_mobile:'',
+			},
+		},
+		methods:{
+			initPage:function(){
+				var _this = this; 
+				$.ajax({
+	                type: "get",
+	                url: getUrl()+"/user/authorize",
+	                data:{'access_token':this.token},
+	                dataType: "json",
+	                success: function(data){
+	                	if(data.code == "0"){
+	                		_this.showblock = true;
+	                		if(data.content.bind_state == "0"){
+	                			_this.content.contact_mobile = data.content.bind_info.contact_mobile;
+	                		}else if(data.content.bind_state == "1"){
+								sessionStorage.setItem('user_information', JSON.stringify(data.content.bind_info));
+								sessionStorage.setItem('user_id', JSON.stringify(data.content.user_id));
+//							window.location.href="comment.html?community_name="+data.content.bind_info.community_name
+//															+"&manager_name="+data.content.bind_info.manager_name
+//															+"&manager_mobile="+data.content.bind_info.manager_mobile
+//															+"&manager_job="+data.content.bind_info.manager_job
+//															+"&manager_img="+data.content.bind_info.manager_img
+//															+"&manager_id="+data.content.bind_info.manager_id
+								setTimeout(function(){
+									window.location.href="comment.html"
+								},2000);
+	                		}
+	                    }else{
+	                        toastMsg(data.message,3000);
+	                    }
+	                }
+	            });
+			}
+		},
+		created:function(){
+			if(GetRequest() != undefined){
+				localStorage.setItem("access_token",GetRequest().split("=")[1]);
+				this.token = localStorage.getItem("access_token");
+				this.initPage();
+			}else{
+				toastMsg("token不存在");
+			} 
+			
+		}
+	})
+</script>
+</body>
+</html>
