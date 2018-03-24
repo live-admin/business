@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>数据展示</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="../../layui/css/layui.css" media="all" />
+	<link rel="stylesheet" href="../../css/font_eolqem241z66flxr.css" media="all" />
+	<style>
+		.box{
+			widows:100%;
+			height:auto;
+		}
+		.box li{
+			width:96%;
+			height:400px;
+		}
+		.box li div{
+			float: left;
+		}
+		.Pie_chart{
+			width:45%;
+			padding:10px 2%;
+			height:100%;
+		}
+		.Line_chart{
+			width:45%;
+			padding:10px 2%;
+			height:100%;
+		}
+		.Histogram{
+			width:90%;
+			padding:3% 2% 0 2%;
+			height:85%;
+		}
+		.max_box{
+			/*border:1px solid #000;*/
+			padding-top:3%;
+		}
+		.See{
+			/*margin:0 1%;*/
+		}
+	</style>
+</head>
+<body class="childrenBody">
+    <ul class="box">
+		<li>
+			<div class="Pie_chart" id="PieChart">
+
+			</div>
+			<div class="Line_chart" id="LineChart">
+
+			</div>
+		</li>
+		<li class="max_box">
+			<div class="layui-form" action="">
+				<div class="layui-inline">
+					<label class="layui-form-label">日期类型</label>
+					<div class="layui-input-inline">
+						<select name="date_type" id="date_type">
+							<option value="">请选择日期类型</option>
+							<option value="1">最近一周</option>
+							<option value="2">最近一月</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">名称搜索</label>
+					<div class="layui-input-inline">
+						<!--要模糊匹配的文本框-->
+						<input type="text" name="community_name" id="community_name" placeholder="小区/片区/大区/事业部名称" autocomplete="off" class="layui-input">
+						<!--模糊匹配窗口-->
+						<div id="div_items">
+						</div>
+					</div>
+				</div>
+				<div class="layui-inline See">
+					<a class="layui-btn search_btn layui-btn-normal">搜索</a>
+				</div>
+			</div>
+			<div class="Histogram" id="Histogram">
+
+			</div>
+		</li>
+		<!--<li class="Histogram" id="Histogram">-->
+		<!--</li>-->
+	</ul>
+</body>
+<script type="text/javascript" src="../../layui/layui.js"></script>
+<script type="text/javascript" src="../../layui/lay/modules/jquery.cookie.js"></script>
+<script type="text/javascript" src="../../js/echarts.js"></script>
+<script type="text/javascript" src="linksAdd.js"></script>
+<style>
+	#div_items {
+		position: absolute;
+		width:96%;
+		height: auto;
+		border: 1px solid #e6e6e6;
+		padding:0 2%;
+		border-top: 0px;
+		overflow: auto;
+		display: none;
+		background: #fff;
+		z-index: 999;
+	}
+	.div_item {
+		width: 100%;
+		height: 20px;
+		margin-top: 1px;
+		font-size: 13px;
+		line-height: 20px;
+	}
+</style>
+<script>
+
+    //
+
+</script>
+</html>
